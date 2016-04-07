@@ -1,0 +1,156 @@
+<link href="static/bower_components/polymer/polymer-micro.html" rel="import">
+
+<link href="static/bower_components/iron-ajax/iron-ajax.html" rel="import">
+<link href="static/bower_components/iron-icons/iron-icons.html" rel="import">
+<link href="static/bower_components/iron-icons/av-icons.html" rel="import">
+<link href="static/bower_components/iron-icon/iron-icon.html" rel="import">
+
+<link href="static/bower_components/paper-toast/paper-toast.html" rel="import">
+<link href="static/bower_components/paper-button/paper-button.html" rel="import">
+
+<dom-module id="notification-pool">
+	<template>
+		<style>
+		
+			.main-toast{
+				padding-top: 1vh;
+			    padding-bottom: 1vh;
+			    padding-left: 1vw;
+			}
+		
+			.notification-icon{
+				padding-left:1vw;
+				padding-right:1vw;
+				height:6vh;
+				width:10vw;
+			}
+		
+			.notification-item{
+				padding-left:1vw;
+				padding-right:1vw;
+			}
+			
+			.notification-title-bar{
+				text-align:center;
+				 padding-bottom: 8px;
+			}
+			
+			.notification-content-bar{
+				text-align:center;
+				padding-bottom: 8px;
+			}
+			
+			.center{
+				text-align:center;
+			}
+			
+			.close-button {
+			    text-transform: none;
+			    color: #eeff41;
+			  }
+			
+		</style>
+		<iron-ajax id="notificationSesUuidAjax"
+				   url="{{baseUrl}}/notificationsSesUUID"
+				   method="GET"
+				   content-type="{{notificationSesUuidRequestContentType}}"
+				   on-response="onSesUuidResponse"
+				   last-response="{{sesUuidReponse}}">
+		</iron-ajax>
+		<iron-ajax id="notificationAjax"
+				   url="{{baseUrl}}/notifications"
+				   body="{{notificationRequestBody}}"
+				   method="POST"
+				   content-type="{{notificationRequestContentType}}"
+				   last-response="{{notifications}}">
+		</iron-ajax>
+		<paper-toast id="mainToast" 
+					 class="fit-bottom main-toast" 
+					 iron-overlay-closed="onMainToastClosed"
+					 duration="4000">
+			
+			<template is="dom-repeat" items={{notifications.notifications}}>
+				<div class="notification-content-bar">
+					<iron-icon class="notification-icon" icon="icons:info"></iron-icon>
+					<span class="notification-item">{{item.title}}</span>
+				</div>
+				<div class="notification-content-bar">
+					<span class="notification-item">{{item.text}}</span>
+				</div>
+			</template>
+			<div class="center">
+				<!-- <paper-button onclick="mainToast.toggle()" class="yellow-button">Zatvoriť</paper-button> -->
+			</div>
+		</paper-toast>
+	</template>
+</dom-module>
+<script>
+	Polymer({
+		is:'notification-pool',
+		
+		properties:{
+			
+			baseUrl:{
+				
+			},
+			
+			notifications : {
+				observer:'onNotificationRequestResponse'
+			},
+			
+			sesUuidReponse:{
+				
+			},
+			
+			uuid : {
+				
+			},
+			
+			notificationRequestBody:{
+				computed : 'computeNotificationRequestBody(uuid)'
+			},
+			
+			notificationRequestContentType:{
+				value:'application/json'
+			},
+			
+			notificationSesUuidRequestContentType:{
+				value:'application/json'
+			}
+		},
+		
+		ready : function(){	
+			this.$.notificationSesUuidAjax.generateRequest();
+		},
+		
+		onSesUuidResponse:function(e){
+			
+			this.uuid=this.sesUuidReponse.uuid;
+			
+			console.log("Notification session obtained for "+this.uuid);
+			
+			var ref = this;
+			setInterval(function(){
+				ref.processNotifications();
+			}, 10000);
+		},
+		
+		processNotifications : function(){
+			this.$.notificationAjax.generateRequest();
+		},
+		
+		onNotificationRequestResponse : function(){
+			if(this.notifications != null && this.notifications.valid && this.notifications.notifications.length){
+				console.log(this.notifications.notifications.length + " notification found");
+				this.$.mainToast.toggle();
+			}else{
+				console.log("No notification found");
+			}
+		},
+				
+		computeNotificationRequestBody : function(uuid){
+			return JSON.stringify({'uuid' : uuid});
+		}
+		
+	});
+</script>

@@ -1,0 +1,146 @@
+<link href="./../static/bower_components/polymer/polymer-micro.html" rel="import">
+
+<link href="./../static/bower_components/paper-card/paper-card.html" rel="import">
+<link href="./../static/bower_components/paper-dropdown-menu/paper-dropdown-menu.html" rel="import">
+<link href="./../static/bower_components/paper-listbox/paper-listbox.html" rel="import">
+<link href="./../static/bower_components/paper-item/paper-item.html" rel="import">
+<link href="./../static/bower_components/paper-input/paper-input.html" rel="import">
+<link href="./../static/bower_components/paper-button/paper-button.html" rel="import">
+<link href="./../static/bower_components/paper-toast/paper-toast.html" rel="import">
+
+<link href="./../static/bower_components/iron-ajax/iron-ajax.html" rel="import">
+
+<dom-module id="notification-admin-page">
+	<template>
+		<style>
+			.notification-admin-card{
+				width:100%;
+			}
+		</style>
+		<iron-ajax id="notificationAjax"
+				   body="{{requestBody}}"
+				   content-type="{{requestContentType}}"
+				   method="POST"
+				   debounce-duration="500"
+				   url="{{baseUrl}}/notificationSave"
+				   on-response="handleResponse"
+				   on-error="handleError">
+		</iron-ajax>
+		<paper-card heading="Administrácia notifikácií" class="notification-admin-card">
+		  	<div class="card-content">
+		  	
+		  			<!-- Typ notifikacie -->
+					<paper-dropdown-menu label="Typ notifikácie">
+						  <paper-listbox class="dropdown-content"> 
+							    <template is="dom-repeat" items="{{notificationTypes}}">
+							    	<paper-item on-tap="onSelectType">{{item.name}}</paper-item>
+							    </template>
+						  </paper-listbox>
+					</paper-dropdown-menu>
+					
+					<!-- Priorita notifikacie -->
+					<paper-dropdown-menu label="Priorita notifikácie">
+						  <paper-listbox class="dropdown-content"> 
+							    <template is="dom-repeat" items="{{notificationSeverities}}">
+							    	<paper-item on-tap="onSelectSeverity">{{item.name}}</paper-item>
+							    </template>
+						  </paper-listbox>
+					</paper-dropdown-menu>
+					
+					<!-- Titulok -->
+					<paper-input placeholder="Titulok" value="{{title}}"></paper-input>
+					
+					<!-- Text -->
+					<paper-input placeholder="Text" value="{{text}}"></paper-input>
+			</div>
+			<div class="card-actions">
+    			<paper-button on-tap="sendNotification">Odoslať notifikáciu</paper-button>
+  			</div>	
+		</paper-card>
+		<div>
+			<paper-toast id="mainToast" 
+						 text="{{toastText}}" 
+						 duration="3000"
+						 class="fit-bottom">
+			</paper-toast>
+		</div>
+	</template>
+</dom-module>
+<script>
+	Polymer({
+		is : 'notification-admin-page',
+		properties :{
+			notificationTypes:{
+				value:[{'name':'Do aplikácie','type':'APPLICATION'},
+				       {'name':'Do telefónu','type':'NATIVE'}]
+			},
+			selectedType:{
+				
+			},
+			
+			notificationSeverities:{
+				value:[{'name':'Normálna','type':'NORMAL'},
+				       {'name':'Doležitá','type':'IMPORTANT'}]
+			},
+			selectedSeverity:{
+				
+			},
+			
+			title:{},
+			
+			text:{},
+			
+			toastText:{},
+			
+			requestBody:{
+				computed:'computeRequestBody(title,text,selectedType,selectedSeverity)'
+			},
+			
+			requestContentType:{
+				value:'application/json'
+			}
+		},
+		
+		ready:function(e){
+			
+		},
+		
+		onSelectType:function(e){
+			this.selectedType=e.model.item;
+			console.log("Selected Type :"+this.selectedType.name);
+		},
+		
+		onSelectSeverity:function(e){
+			this.selectedSeverity=e.model.item;
+			console.log("Selected Severity :"+this.selectedSeverity.name);
+		},
+		
+		sendNotification:function(e){
+			if( this.title == null || 
+				this.text == null || 
+				this.selectedType == null || 
+				this.selectedSeverity == null){
+				
+				this.toastText="Všetky položky sú povinné";
+				this.$.mainToast.open();
+			}else{
+				this.$.notificationAjax.generateRequest();
+			}
+		},
+		
+		handleResponse:function(){
+			this.toastText="Notifikácia bola spracovaná";
+			this.$.mainToast.open();
+		},
+		
+		handleError:function(){
+			this.toastText="Chyba pri spracovaní notifikácie";
+			this.$.mainToast.open();
+		},
+		
+		computeRequestBody:function(title,text,selectedType,selectedSeverity){
+			return JSON.stringify({'title':title,'text':text,'type':selectedType.type,'severity':selectedSeverity.type});
+		}
+		
+	});
+</script>

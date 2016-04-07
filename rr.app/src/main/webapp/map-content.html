@@ -1,0 +1,54 @@
+<link href="static/bower_components/polymer/polymer-micro.html" rel="import">
+<link href="static/bower_components/google-map/google-map.html" rel="import">
+<link href="static/bower_components/google-map/google-map-marker.html" rel="import">
+<link href="static/bower_components/google-map/google-map-directions.html" rel="import">
+
+<dom-module id="map-content">
+	<template>
+		<div class="map-style">
+			<google-map map="{{map}}" zoom="{{defaultZoom}}" id="thisMap" latitude="{{refference.latitude}}" longitude="{{refference.longitude}}" apiKey="{{apiKey}}" additionalMapOptions="{{additionalMapOptions}}" fit-to-markers>
+					<template visible="{{markers.valid}}" is="dom-repeat" items="{{markers.markers}}">
+						<google-map-marker latitude="{{item.latitude}}" longitude="{{item.longitude}}" draggable="false" title="{{item.title}}"></google-map-marker>
+					</template>
+			</google-map>
+			<template visible="{{routes.valid}}" is="dom-repeat" items="{{routes.mapRoutes}}">
+				<google-map-directions map="{{map}}"
+					      start-address="{{item.startAddress}}"
+					      end-address="{{item.endAddress}}"
+					      travel-mode="{{item.travelMode}}"
+					      >
+				</google-map-directions>
+			</template>
+		</div>
+	</template>
+</dom-module>
+<script>
+	Polymer({
+		is:'map-content',
+		
+		properties:{
+			map:{
+				notify:true
+			},
+			refference:{
+				notify:true
+			},
+			markers:{
+				notify:true
+			},
+			routes:{
+				notify:true
+			},
+			apiKey:{
+				notify:true
+			},
+			defaultZoom:{
+				value:15,
+				notify:true
+			},
+			additionalMapOptions:{
+				notify:true
+			}
+		}
+	});
+</script>

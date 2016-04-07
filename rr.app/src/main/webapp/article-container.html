@@ -1,0 +1,108 @@
+<link href="static/bower_components/polymer/polymer-micro.html" rel="import">
+<link href="static/bower_components/paper-material/paper-material.html" rel="import">
+<link href="static/bower_components/paper-icon-button/paper-icon-button.html" rel="import">
+<link href="static/bower_components/iron-icons/iron-icons.html" rel="import">
+<link href="static/bower_components/iron-icons/av-icons.html" rel="import">
+
+<link href="static/bower_components/iron-ajax/iron-ajax.html" rel="import">
+<link href="map-refference.html" rel="import">
+
+<dom-module id="article-container">
+	<style is="custom-style">
+		.main-material{
+			margin:5px;
+			padding:5px;
+			background-color:#CED2FF;
+		}
+		
+		.sub-material{
+			margin:5px;
+			padding:5px;
+			background-color:white;
+		}
+		
+		.sub-material-marker{
+			padding-bottom: 3px !important;
+		}
+		
+		.main-material-font{
+			font-size:20px;
+		}
+		
+		.sub-material-font{
+			font-size:18px;
+		}
+		
+		.content-font{
+			font-size:12px;
+		}
+	</style>
+	
+	<template>
+		<div>
+			<iron-ajax
+				id="mapRefferenceAjax"
+				url="{{baseUrl}}/mapRefferencesLoadForArticle"
+				body="{{mapRefferenceRequestBody}}"
+				handle-as="json"
+				content-type="{{mapRefferenceBodyContentType}}"
+				method="POST"
+				last-response="{{mapRefferences}}">
+				</iron-ajax>
+		</div>
+		<paper-material class="main-material">
+			<paper-material class="sub-material">
+				<iron-icon icon="icons:label" class="sub-material-marker"></iron-icon>
+				<span class="main-material-font">{{article.mainTitle}}</span>
+			</paper-material>
+			<paper-material class="sub-material">
+				<iron-icon icon="icons:label-outline" class="sub-material-marker"></iron-icon>
+				<span class="sub-material-font">{{article.subTitle}}</span>
+			</paper-material>
+			<paper-material class="sub-material">
+				<iron-icon icon="icons:list" class="sub-material-marker"></iron-icon>
+				<span class="content-font">{{article.content}}</span>
+			</paper-material>
+			<template is="dom-repeat" visible="showMapRefferences" items="{{mapRefferences.mapRefferences}}">
+				<paper-material class="sub-material">					
+					<map-refference refference={{item}} base-url="{{baseUrl}}"></map-refference>
+				</paper-material>
+			</template>
+		</paper-material>
+	</template>
+</dom-module>
+<script>
+	Polymer({
+		is: 'article-container',
+		properties:{
+			article: {
+				notify:true
+			},
+			mapRefferenceRequestBody:{
+				computed:'computeMapRefferenceRequestBody(article)'
+			},
+			mapRefferenceBodyContentType:{
+				value:'application/json'
+			},
+			mapRefferences:{
+				
+			},
+			baseUrl:{
+				notify:true,
+				observer:'urlAfterBind'
+			}
+		},
+		
+		urlAfterBind:function(){
+			this.$.mapRefferenceAjax.generateRequest();
+		},
+		
+		computeMapRefferenceRequestBody:function(article){
+			return JSON.stringify({"articleId":article.id});
+		},
+		
+		showMapRefferences:function(){
+			return this.mapRefferences.valid && this.mapRefferences.mapRefferences.lenght >0;
+		}
+	});
+</script>

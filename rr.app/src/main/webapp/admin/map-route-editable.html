@@ -1,0 +1,205 @@
+<dom-module id="map-route-editable">
+	<template>
+		<style>
+			 .red{
+		      	background: var(--google-red-300);
+		    }
+		    
+		    .green{
+		      	background: var(--google-green-300);
+		    }
+
+		    .orange{
+		    	background: var(--paper-orange-100);
+		    }
+
+		    .grey{
+		    	background: var(--paper-blue-grey-100);
+		    }
+
+		    .route-material{
+		    	padding:20px;
+		    	width: 99%;
+		    }
+
+		    .route-material-part{
+		    	display:inline-block;
+		    }
+
+		    .route-material-input{
+		    	width:40%;
+		    	padding-left: 2px;
+		    	padding-right: 2px;
+		    }
+
+		    .route-material-actions{
+		    	float:right;
+		    	width: 270px;
+		    }
+
+		    .route-material-button{
+		    	height: 40px;
+		    }
+
+		    .locations-title{
+		    	color:black;
+		    	font-size:16px;
+		    	padding-top: 10px;
+		    	padding-bottom: 10px;
+		    }
+
+		    .addNewButton{
+		    	color:black;
+		    }
+
+		    
+		</style>
+		<!-- Save or Update -->
+		<iron-ajax id="saveOrUpdateDatasource"
+				   url="{{baseUrl}}/routeSaveOrUpdate"
+				   method="{{crudRequestMethod}}"
+				   body="{{saveOrUpdateBody}}"
+				   last-response="{{saveOrUpdateLastResponse}}"
+				   content-type="{{crudRequestContentType}}"
+				   handle-as="{{crudResponseHandleAs}}">
+		</iron-ajax>
+
+		<iron-ajax id="mapLocationAjax"
+				   url="{{baseUrl}}/routeLoadMapLocations"
+				   method="POST"
+				   handle-as="json"
+				   last-response="{{mapLocationLastReponse}}"
+				   body="{{mapLocationRequestBody}}"
+				   content-type="{{mapLocationRequestContent}}">	
+		</iron-ajax>
+		<div>
+			<paper-material class="route-material orange">
+					<paper-input label="Začiatočná adresa" value="{{route.startAddress}}" class="route-material-part route-material-input"></paper-input>
+					<paper-input label="Koncová adresa" value="{{route.endAddress}}" class="route-material-part route-material-input"></paper-input>
+					<paper-button raised 
+								  class="green route-material-button" 
+								  on-tap="save">
+								  Uložiť
+					</paper-button>
+					<paper-button raised 
+								  class="red route-material-button" 
+								  on-tap="remove">
+								  Odstrániť
+				    </paper-button>			
+
+					<div>
+						<div class="locations-title">Medzizástavky</div>
+						<div>
+							<paper-button class="grey addNewButton" on-tap="addNew">Pridať</paper-button>
+						</div>		    
+						<template is="dom-repeat" items="{{locations}}">
+							<map-location-editable base-url="{{baseUrl}}"
+												   location="{{item}}"
+												   parent-route-id="{{route.id}}"
+												   location-remove-callback="{{onMapLocationRemoveCallback}}">
+							</map-location-editable>
+						</template>
+					</div>
+			</paper-material>
+		</div>
+	</template>
+</dom-module>
+<script>
+	Polymer({
+		is:'map-route-editable',
+
+		behaviors:[CrudBehavior],
+
+		properties:{
+			baseUrl:{},
+
+			parentRefferenceId:{
+				notify:true
+			},
+
+			route:{
+				notify:true
+			},
+
+			routeRemoveCallback:{},
+
+			/**
+			* Map Location Part
+			*/
+
+			mapLocationLastReponse:{observer:'onMapLocationsReceived'},
+
+			locations:{},
+
+			mapLocationRequestBody:{computed:'computeMapLocationRequestBody(route)'},
+
+			mapLocationRequestContent:{value:'application/json'},
+
+			onMapLocationRemoveCallback:{}
+		},
+
+		observers :['validateObserver(route.startAddress,route.endAddress,parentRefferenceId)'],
+
+		ready:function(){
+			this.initCrudBehavior(this.route,[this.$.mapLocationAjax],this.routeRemoveCallback,this.$.saveOrUpdateDatasource);
+			this.initOnMapLocationRemoveCallback();
+		},
+
+		onSaveOrUpdateResponse:function(){
+			if(this.saveOrUpdateLastResponse != null && this.saveOrUpdateLastResponse.valid){
+				this.route=this.saveOrUpdateLastResponse.route;
+				this.notifyDataChanged(this.route);
+				console.log("Map route saved");
+			}else{
+				console.log("Error saving Map route");
+			}
+		},
+
+		refreshSaveOrUpdateBody:function(valid,route,parentRefferenceId){
+
+			if(!valid){
+				return null;
+			}
+
+			this.saveOrUpdateBody = JSON.stringify({
+									'id':route.id,
+									'parentRefferenceId':parentRefferenceId,
+									'startAddress':route.startAddress,
+									'endAddress':route.endAddress
+								});
+			console.log(this.saveOrUpdateBody);
+		},
+
+		validateObserver:function(startAddress,endAddress,parentRefferenceId){
+			this.valid = startAddress != null && startAddress !="" && endAddress != null && endAddress !="" && parentRefferenceId != null && parentRefferenceId !="";
+			this.refreshSaveOrUpdateBody(this.valid,this.route,parentRefferenceId);
+		},
+
+
+
+		initOnMapLocationRemoveCallback:function(){
+			var ref=this;
+
+			this.onMapLocationRemoveCallback=({
+				onRemove:function(item){
+					var index = ref.locations.indexOf(item);
+					console.log("onMapLocationRemoveCallback for index "+index);
+					ref.splice('locations', index, 1);
+				}
+			});
+		},
+
+		computeMapLocationRequestBody:function(route){
+			return JSON.stringify({"routeId" : route.id});
+		},
+
+		onMapLocationsReceived:function(){
+			this.locations=this.mapLocationLastReponse.locations;
+		},
+
+		addNew:function(){
+			this.unshift('locations',{});
+		}
+	});
+
+</script>

@@ -1,0 +1,75 @@
+<link href="static/bower_components/polymer/polymer-micro.html" rel="import">
+<link href="static/bower_components/iron-ajax/iron-ajax.html" rel="import">
+<link href="static/bower_components/paper-icon-button/paper-icon-button.html" rel="import">
+<link href="static/bower_components/iron-icons/iron-icons.html" rel="import">
+<link href="static/bower_components/iron-icons/av-icons.html" rel="import">
+<link href="article-container.html" rel="import">
+
+<dom-module id="articles-container">
+	<style is="custom-style">
+		.main-toolbar{
+			background-color:#3C7FB7;
+			color:#FFFFFF;
+			display: block;
+	  	    width: 100%;
+		}
+	</style>
+	<template>
+		<div>
+			<iron-ajax
+				id="articleAjax"
+				url="{{baseUrl}}/articleLoadAll"
+				body="{{articlesServiceParams}}"
+				handle-as="json"
+				content-type="{{articlesServiceBodyContentType}}"
+				method="POST"
+				last-response="{{articles}}">
+			</iron-ajax>
+			<paper-toolbar class="medium-tall main-toolbar" flex>
+			  	<paper-icon-button icon="menu"></paper-icon-button>
+			  	<span class="title">Radio Rallye App</span>
+			</paper-toolbar>
+			<div>
+				<template  visible={{articles.valid}} is="dom-repeat" items="{{articles.articles}}">
+					<article-container base-url="{{baseUrl}}" article="{{item}}"></article-container>
+				</template>
+			</div>
+		</div>
+	</template>
+</dom-module>
+<script>
+	Polymer({
+		is: 'articles-container',
+		properties:{
+			articlesServiceParams:{
+				computed:'computeArticeServiceParams(startIndex,pageSize)'
+			},
+			articlesServiceBodyContentType:{
+				value:'application/json'
+			},
+			articles:{
+				notify:true
+			},
+			startIndex:{
+				value:0,
+				notify:true
+			},
+			pageSize:{
+				value:10,
+				notify:true
+			},
+			baseUrl:{
+				notify:true,
+				observer:'urlAfterBind'
+			}
+			
+		},	
+		urlAfterBind:function(){
+			this.$.articleAjax.generateRequest();
+		},
+		
+		computeArticeServiceParams:function(startIndex,pageSize){
+			return JSON.stringify({});
+		}
+	});
+</script>

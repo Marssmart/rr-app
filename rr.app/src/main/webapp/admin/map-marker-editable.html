@@ -1,0 +1,145 @@
+
+<dom-module id="map-marker-editable">
+	<template>
+		<style>
+			.data-container{
+				width:100%;
+				padding:10px;
+				margin-top: 10px;
+				margin-bottom: 10px;
+			}
+			
+			.actions-container{
+				float: right;
+    			padding-top: 11px;
+			}
+			
+			.single-data{
+				display:inline-block;
+				width:25%;
+				padding-left:5px;
+				padding-right:5px;
+			}
+			
+			 .red{
+		      	background: var(--google-red-300);
+		    }
+		    
+		    .green{
+		      	background: var(--google-green-300);
+		    }
+
+		    .indigo{
+		    	background: var(--paper-indigo-50);
+		    }
+
+		    .black-text{
+		    	color:black;
+		    }
+		    
+		</style>
+		<div>
+
+			<iron-ajax id="saveOrUpdateDatasource"
+				   url="{{baseUrl}}/markerSaveOrUpdate"
+				   method="{{crudRequestMethod}}"
+				   body="{{saveOrUpdateBody}}"
+				   last-response="{{saveOrUpdateLastResponse}}"
+				   content-type="{{crudRequestContentType}}"
+				   handle-as="{{crudResponseHandleAs}}">
+			</iron-ajax>
+
+			<paper-material class="data-container indigo">
+				<div>
+					<template is="dom-if" if="{{!saved}}">
+						<span class="black-text">
+							<iron-icon icon="icons:block"></iron-icon>
+							Neuložený	
+						</span>
+					</template>
+
+					<template is="dom-if" if="{{!valid}}">
+						<span class="black-text">
+							<iron-icon icon="icons:cancel"></iron-icon>
+							Neplatná kombinácia dát
+						</span>
+					</template>
+				</div>
+
+				<paper-input label="Titulok" value="{{marker.title}}" class="single-data"></paper-input>
+				<paper-input label="Zemepisná Šírka" value="{{marker.latitude}}" class="single-data"></paper-input>
+				<paper-input label="Zemepisná Výška" value="{{marker.longitude}}" class="single-data"></paper-input>
+				<span class="actions-container">
+					<paper-button raised class="green" on-tap="save">Uložiť</paper-button>
+					<paper-button raised class="red" on-tap="remove">Odstrániť</paper-button>
+				</span>
+			</paper-material>
+		</div>
+	</template>
+</dom-module>
+<script>
+	Polymer({
+		is:'map-marker-editable',
+
+		behaviors:[CrudBehavior],
+
+		properties:{
+			baseUrl:{
+				notify:true
+			},
+
+			parentRefferenceId:{
+				notify:true
+			},
+			
+			marker:{
+				notify:true
+			},
+			
+			markerRemoveCallback:{
+				
+			}
+		},
+
+		observers :['validateObserver(marker.latitude,marker.longitude,marker.title)'],
+
+		ready:function(){
+			this.initCrudBehavior(this.marker,[],this.markerRemoveCallback,this.$.saveOrUpdateDatasource);
+		},
+		
+		refreshSaveOrUpdateBody:function(valid,location){
+
+			if(!valid){
+				return null;
+			}
+
+			this.saveOrUpdateBody = JSON.stringify({
+									'id':this.marker.id,
+									'parrentMapRefferenceId':this.parentRefferenceId,
+									'latitude':this.marker.latitude,
+									'longitude':this.marker.longitude,
+									'title':this.marker.title
+								});
+		},
+
+		onSaveOrUpdateResponse:function(){
+			if(this.saveOrUpdateLastResponse != null && this.saveOrUpdateLastResponse.valid){
+				console.log("Saved!");
+				this.marker=this.saveOrUpdateLastResponse.marker;
+				this.notifyDataChanged(this.marker);
+			}else{
+				console.log("Erro while saving");
+			}
+		},
+
+		validateObserver:function(latitude,longitude,title){
+			this.valid = latitude != null && 
+						 latitude != "" &&
+						 longitude != null && 
+						 longitude != "" &&
+						 title != null && 
+						 title != "";
+			this.refreshSaveOrUpdateBody(this.valid,this.marker);
+		}
+	});
+</script>

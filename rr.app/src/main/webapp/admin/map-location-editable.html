@@ -1,0 +1,120 @@
+<dom-module id="map-location-editable">
+	<template>
+		<style>
+			.location-material{
+				padding:20px;
+				width:98%;
+				margin-top: 10px;
+				margin-bottom: 10px;
+			}
+
+			.location-input{
+				width:39%;
+				display: inline-block;
+				padding-left: 2px;
+				padding-right: 2px;
+			}
+
+			.location-button{
+				
+			}
+
+			 .red{
+		      	background: var(--google-red-300);
+		    }
+		    
+		    .green{
+		      	background: var(--google-green-300);
+		    }
+
+  			.grey{
+		    	background: var(--paper-blue-grey-100);
+		    }
+
+		</style>
+
+		<iron-ajax id="saveOrUpdateDatasource"
+				   url="{{baseUrl}}/locationSaveOrUpdate"
+				   method="{{crudRequestMethod}}"
+				   body="{{saveOrUpdateBody}}"
+				   last-response="{{saveOrUpdateLastResponse}}"
+				   content-type="{{crudRequestContentType}}"
+				   handle-as="{{crudResponseHandleAs}}">
+		</iron-ajax>
+
+		<paper-material class="location-material grey">
+			<div>
+				<template is="dom-if" if="{{!saved}}">
+					<span>
+						<iron-icon icon="icons:block"></iron-icon>
+						Neuložený	
+					</span>
+				</template>
+
+				<template is="dom-if" if="{{!valid}}">
+					<span>
+						<iron-icon icon="icons:cancel"></iron-icon>
+						Neplatná kombinácia dát
+					</span>
+				</template>
+			</div>
+			<div>
+				<paper-input label="Poradie" value="{{location.locationOrder}}" class="location-input"></paper-input>
+				<paper-input label="Meno" value="{{location.name}}" class="location-input"></paper-input>
+				<paper-button raised class="green location-button" on-tap="save">Uložiť</paper-button>
+				<paper-button raised class="red location-button" on-tap="remove">Odstrániť</paper-button>
+			</div>
+		</paper-material>
+	</template>
+</dom-module>
+<script>
+	Polymer({
+		is:'map-location-editable',
+
+		behaviors:[CrudBehavior],
+
+		properties:{
+			baseUrl:{},
+
+			parentRouteId:{notify:true},
+
+			location:{notify:true},
+
+			locationRemoveCallback:{},
+
+		},
+
+		observers :['validateObserver(location.locationOrder,location.name)'],
+
+		ready:function(){
+			this.initCrudBehavior(this.location,[],this.locationRemoveCallback,this.$.saveOrUpdateDatasource);
+		},
+
+		refreshSaveOrUpdateBody:function(valid,location){
+
+			if(!valid){
+				return null;
+			}
+
+			this.saveOrUpdateBody = JSON.stringify({
+									'id':location.id,
+									'parentRouteId':this.parentRouteId,
+									'order':location.locationOrder,
+									'name':location.name
+								});
+		},
+
+		onSaveOrUpdateResponse:function(){
+			if(this.saveOrUpdateLastResponse != null && this.saveOrUpdateLastResponse.valid){
+				this.location=this.saveOrUpdateLastResponse.location;
+				this.notifyDataChanged(this.location);
+			}
+		},
+
+		validateObserver:function(order,name){
+			this.valid = order != null && order !="" && name != null && name !="";
+			this.refreshSaveOrUpdateBody(this.valid,this.location);
+		}
+	});
+
+</script>

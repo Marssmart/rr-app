@@ -1,0 +1,23 @@
+<!-- paper elements -->
+<link href="./../static/bower_components/polymer/polymer-micro.html" rel="import">
+
+<link href="nofitication-admin-page.html" rel="import">
+<link href="articles-admin-page.html" rel="import">
+
+<dom-module id="admin-index-page-container">
+	<template>
+		<notification-admin-page base-url="{{baseUrl}}"></notification-admin-page>
+		<articles-admin-page base-url="{{baseUrl}}"></articles-admin-page>
+	</template>
+</dom-module>
+<script>
+	Polymer({
+		is:'admin-index-page-container',
+		properties:{
+			baseUrl:{
+				type:String,
+				value:'http://localhost:5600/rr-app'
+			}
+		}
+	});
+</script>

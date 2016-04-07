@@ -1,0 +1,146 @@
+<link href="static/bower_components/polymer/polymer-micro.html" rel="import">
+<link href="static/bower_components/iron-ajax/iron-ajax.html" rel="import">
+<link href="static/bower_components/paper-button/paper-button.html" rel="import">
+<link href="static/bower_components/paper-dialog/paper-dialog.html" rel="import">
+
+<link href="static/bower_components/neon-animation/animations/scale-up-animation.html" rel="import">
+<link href="static/bower_components/neon-animation/animations/fade-out-animation.html" rel="import">
+
+<link href="map-content.html" rel="import">
+
+<dom-module id="map-refference">
+	<template>
+		<style>
+			.map-style{
+				height:60vh;
+				min-height:60vh;
+			}
+			
+			.full-map-style{
+				height:85%;
+			}
+			
+			.centered{
+				text-align:center;
+			}
+			
+			.map-button{
+				margin-top:5px;
+				background-color: #3C7FB7;
+				color:white;
+			}
+		</style>
+		<paper-dialog id="mapFullscreenDialog"
+				entry-animation="scale-up-animation"
+              	exit-animation="fade-out-animation"
+              	modal="true"
+              	style="height:100%;width:100%">
+              		<div class="centered full-map-style">
+						<map-content refference="{{refference}}" 
+									 markers="{{mapMarkers}}"
+									 routes="{{mapRoutes}}"
+									 api-key="{{mapApiKey}}" 
+									 additional-map-options="{{mapOptions}}"
+									 >
+						</map-content>
+						<paper-button raised on-tap="closeFullScreenMap" class="map-button">Close Map</paper-button>
+					</div>
+		</paper-dialog>
+		<div>
+			<iron-ajax
+				id="mapMarkerAjax"
+				url="{{baseUrl}}/markersLoadForArticle"
+				body="{{mapMarkerRequestBody}}"
+				handle-as="json"
+				content-type="{{mapMarkerBodyContentType}}"
+				method="POST"
+				last-response="{{mapMarkers}}"></iron-ajax>
+			<iron-ajax
+				id="mapRoutesAjax"
+				url="{{baseUrl}}/mapRoutesLoadForMapRefference"
+				body="{{mapRoutesRequestBody}}"
+				handle-as="json"
+				content-type="{{mapRoutesBodyContentType}}"
+				method="POST"
+				last-response="{{mapRoutes}}"></iron-ajax>
+				
+		</div>
+		<div class="map-style" >
+			<map-content id="mainMapContent" refference="{{refference}}" 
+									 markers="{{mapMarkers}}"
+									 routes="{{mapRoutes}}"
+									 api-key="{{mapApiKey}}" 
+									 additional-map-options="{{mapOptions}}">
+						</map-content>
+		</div>
+		<div class="centered">
+			<paper-button raised on-tap="openFullScreenMap" class="map-button">Full Screen Map</paper-button>
+		</div>
+	</template>
+</dom-module>
+<script>
+	Polymer({
+		is:'map-refference',
+	
+		properties:{
+			baseUrl:{
+				notify:true
+			},
+			mapMarkerRequestBody:{
+				computed:'computeMapMarkerRequestBody(refference)'
+			},
+			mapRoutesRequestBody:{
+				computed:'computeMapRoutesRequestBody(refference)'
+			},
+			mapMarkerBodyContentType:{
+				value:'application/json'
+			},
+			mapRoutesBodyContentType:{
+				value:'application/json'
+			},
+			mapMarkers:{
+				
+			},
+			mapRoutes:{
+				
+			},
+			refference:{
+				notify:true,
+				observer:'onMapRefferenceBinded'
+			},
+			mapOptions:{
+				computed:'computeMapOptions(refference)'
+			},
+			mapApiKey:{
+				type:String,
+				value:'AIzaSyCTg_AvQnfce-qy63-Pxmjn6gNwoOki7oM'
+			}
+		},
+		
+		computeMapOptions:function(refference){
+			return '{"mapTypeId":"'+refference.mapType.toLowerCase()+'"}';
+		},
+		
+		computeMapMarkerRequestBody:function(refference){
+			return JSON.stringify({"mapRefferenceId":refference.id});			
+		},
+		computeMapRoutesRequestBody:function(refference){
+			return JSON.stringify({"mapRefferenceId":refference.id});
+		},
+		
+		onMapRefferenceBinded:function(){
+			this.$.mapMarkerAjax.generateRequest();
+			this.$.mapRoutesAjax.generateRequest();
+		},
+		openFullScreenMap:function(){
+			this.$.mapFullscreenDialog.toggle();
+		},
+		closeFullScreenMap:function(){
+			this.$.mapFullscreenDialog.close();
+		},
+		onGoogleMapReady:function(e){
+			console.log(e);
+		}
+		
+	});
+</script>

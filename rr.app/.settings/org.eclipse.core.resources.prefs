@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+encoding//src/main/java/org/rapes/rr/app/core/controller/MapRouteController.java=UTF-8
+encoding//src/main/java/org/rapes/rr/app/core/controller/dto/output/location/MapLocationOutputDTO.java=UTF-8
+encoding//src/main/webapp/admin/article-editable.html=UTF-8
+encoding//src/main/webapp/admin/articles-admin-page.html=UTF-8
+encoding//src/main/webapp/admin/map-marker-editable.html=UTF-8
+encoding//src/main/webapp/admin/map-refference-editable.html=UTF-8
+encoding//src/main/webapp/admin/map-route-editable.html=UTF-8
+encoding//src/main/webapp/admin/nofitication-admin-page.html=UTF-8
+encoding//src/main/webapp/notification-pool.html=UTF-8
+encoding/<project>=UTF-8

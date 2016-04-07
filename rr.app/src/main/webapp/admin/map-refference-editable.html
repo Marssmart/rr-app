@@ -1,0 +1,282 @@
+<dom-module id="map-refference-editable">
+	<template>
+		<style>
+			.refferences-card{
+				width:100%;
+				padding:20px;
+				margin-top:20px;
+			}
+			
+			.markers-card{
+				width:100%;
+				padding:20px;
+				margin-top:10px;
+			}
+			
+			.routes-card{
+				width:100%;
+				padding:20px;
+				margin-top:20px;
+			}
+			
+			.numbers-container{
+				display:flex;
+			}
+			
+			.number-input{
+				display:inline-block;
+				width:50%;
+				padding-left:5px;
+				padding-right:5px;
+			}
+			
+			.teal {
+		      	background: var(--paper-teal-50);
+		    }
+		    
+		    .red{
+		      	background: var(--google-red-300);
+		    }
+		    
+		    .green{
+		      	background: var(--google-green-300);
+		    }
+
+		    .paper-green{
+		    	background: var(--paper-green-300);
+		    }
+
+		    .paper-brown{
+		    	background: var(--paper-brown-100);
+		    }
+
+		    .actions-container{
+		    	margin-top:20px;
+		    }
+
+		    .addNewButton{
+		    	margin-top: 20;
+		    }
+			
+		</style>
+		<!-- Save or Update -->
+		<iron-ajax id="saveOrUpdateDatasource"
+				   url="{{baseUrl}}/refferencesSaveOrUpdate"
+				   method="{{crudRequestMethod}}"
+				   body="{{saveOrUpdateBody}}"
+				   last-response="{{saveOrUpdateLastResponse}}"
+				   content-type="{{crudRequestContentType}}"
+				   handle-as="{{crudResponseHandleAs}}">
+		</iron-ajax>
+		
+		<iron-ajax
+				id="mapMarkerAjax"
+				url="{{baseUrl}}/markersLoadForArticle"
+				body="{{mapMarkerRequestBody}}"
+				handle-as="json"
+				content-type="{{mapMarkerBodyContentType}}"
+				method="POST"
+				last-response="{{lastResponseMarkers}}">
+		</iron-ajax>
+		
+		<iron-ajax
+				id="mapRoutesAjax"
+				url="{{baseUrl}}/mapRoutesLoadForMapRefference"
+				body="{{mapRoutesRequestBody}}"
+				handle-as="json"
+				content-type="{{mapRoutesBodyContentType}}"
+				method="POST"
+				last-response="{{lastResponseRoutes}}">
+		</iron-ajax>
+		
+		<paper-card heading="Odkaz na mapu" class="refferences-card teal">
+			<crud-status-bar saved="{{saved}}" valid="{{valid}}">
+			<div class="numbers-container">
+				<paper-input label="Zemepisná Šírka" value="{{refference.latitude}}" class="number-input">
+				</paper-input>
+				<paper-input label="Zemepisná Výška" value="{{refference.longitude}}" class="number-input">
+				</paper-input>
+			</div>
+			
+			<div class="actions-container">
+				<paper-button raised class="green" on-tap="save">Uložiť</paper-button>
+				<paper-button raised class="red" on-tap="remove">Odstrániť</paper-button>
+			</div>
+			
+			<div>
+				<div>
+					<paper-button class="paper-green addNewButton" on-tap="addNewMarker">Pridať</paper-button>
+				</div>
+				<paper-card heading="Body zaujmu" class="markers-card paper-green">
+					<div class="card-content">
+						<template is="dom-repeat" items="{{mapMarkers}}">
+							<map-marker-editable base-url="{{baseUrl}}"
+												 marker="{{item}}"
+												 parent-refference-id="{{refference.id}}"
+												 marker-remove-callback="{{onMapMarkerRemoveCallback}}">
+							</map-marker-editable>
+						</template>
+					</div>
+				</paper-card>
+			</div>
+			
+			<div>
+				<div>
+					<paper-button class="paper-brown addNewButton" on-tap="addNewRoute">Pridať</paper-button>
+				</div>
+				<paper-card heading="Cesty"  class="routes-card paper-brown">
+					<div class="card-content">
+						<template is="dom-repeat" items="{{mapRoutes}}">
+							<map-route-editable base-url="{{baseUrl}}"
+												route="{{item}}"
+												parent-refference-id="{{refference.id}}"
+												route-remove-callback="{{onMapRouteRemoveCallback}}">
+							</map-route-editable>
+						</template>
+					</div>
+				</paper-card>
+			</div>
+			
+			
+		</paper-card>
+	</template>
+</dom-module>
+<script>
+	Polymer({
+		is:'map-refference-editable',
+
+		behaviors:[
+				    CrudBehavior
+				  ],
+
+		properties:{
+			baseUrl:{
+				notify:true
+			},
+			
+			parentArticleId:{
+				notify:true
+			},
+			
+			refference:{notify:true},
+			
+			refferenceRemoveCallback:{notify:true},
+			
+			/**
+			* Map Marker Part
+			*/
+
+			mapMarkerRequestBody:{computed:'computeMapMarkerRequestBody(refference)'},
+			
+			mapMarkerBodyContentType:{value:'application/json'},
+
+			lastResponseMarkers:{},
+
+			mapMarkers:{computed:'computeMapMarkers(lastResponseMarkers)'},
+
+			onMapMarkerRemoveCallback:{},
+
+			/**
+			* Map Routes Part
+			*/
+
+			mapRoutesRequestBody:{computed:'computeMapRoutesRequestBody(refference)'},
+			
+			mapRoutesBodyContentType:{value:'application/json'},
+			
+			lastResponseRoutes:{},
+
+			mapRoutes:{computed:'computeMapRoutes(lastResponseRoutes)'},
+
+			onMapRouteRemoveCallback:{},
+		},
+		
+		observers :['validateObserver(refference.latitude,refference.longitude,parentArticleId)'],
+
+		ready:function(){
+			this.initCrudBehavior(this.refference,
+									[this.$.mapMarkerAjax ,this.$.mapRoutesAjax],
+									this.refferenceRemoveCallback,
+									this.$.saveOrUpdateDatasource);
+			this.initMapMarkerRemoveCallback();
+			this.initMapRouteRemoveCallback();
+		},
+
+		onSaveOrUpdateResponse:function(){
+			if(this.saveOrUpdateLastResponse != null && this.saveOrUpdateLastResponse.valid){
+				this.refference=this.saveOrUpdateLastResponse.refference;
+				this.notifyDataChanged(this.refference);
+				console.log("Map Refference saved");
+			}else{
+				console.log("Error saving Map Refference");
+			}
+		},
+
+		refreshSaveOrUpdateBody:function(valid,refference,parentArticleId){
+
+			if(!valid){
+				return null;
+			}
+
+			this.saveOrUpdateBody = JSON.stringify({
+									'id':refference.id,
+									'parentArticleId':parentArticleId,
+									'latitude':refference.latitude,
+									'longitude':refference.longitude
+								});
+		},
+
+		validateObserver:function(latitude,longitude,parentArticleId){
+			this.valid = latitude != null && latitude !="" && longitude != null && longitude !="" && parentArticleId != null && parentArticleId !="";
+			this.refreshSaveOrUpdateBody(this.valid,this.refference,parentArticleId);
+		},
+
+		initMapMarkerRemoveCallback:function(){
+
+			var ref = this;
+
+			this.onMapMarkerRemoveCallback = ({
+				onRemove:function(item){
+					var index = ref.mapMarkers.indexOf(item);
+					console.log("onMapMarkerRemoveCallback for index "+index);
+					ref.splice('mapMarkers', index, 1);
+				}
+			});
+		},
+
+		initMapRouteRemoveCallback:function(){
+			var ref = this;
+
+			this.onMapRouteRemoveCallback = ({
+				onRemove:function(item){
+					var index = ref.mapRoutes.indexOf(item);
+					console.log("onMapRouteRemoveCallback for index "+index);
+					ref.splice('mapRoutes', index, 1);
+				}
+			});
+		},
+
+
+		computeMapMarkerRequestBody:function(refference){
+			return JSON.stringify({"mapRefferenceId":refference.id});			
+		},
+		computeMapRoutesRequestBody:function(refference){
+			return JSON.stringify({"mapRefferenceId":refference.id});
+		},
+		computeMapMarkers:function(lastResponseMarkers){
+			return lastResponseMarkers.markers;
+		},
+		computeMapRoutes:function(lastResponseRoutes){
+			return lastResponseRoutes.mapRoutes;
+		},
+		
+		addNewMarker:function(){
+			this.unshift('mapMarkers',{});
+		},
+
+		addNewRoute:function(){
+			this.unshift('mapRoutes',{});
+		}
+		
+	});
+</script>

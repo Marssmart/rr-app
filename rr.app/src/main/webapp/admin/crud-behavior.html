@@ -1,0 +1,103 @@
+<script>
+	CrudBehavior={
+		properties:{
+
+			data:{
+				notify:true
+			},
+
+			saved:{
+				type:Boolean,
+				computed:'computeIfSaved(data)',
+				notify:true,
+				observer:'onSavedStateChanged'
+			},
+
+			valid:{
+				type:Boolean,
+				value:false,
+				notify:true
+			},
+
+			datasources:{
+				notify:true
+			},
+
+
+			//save or update
+			saveOrUpdateProvider:{
+				notify:true,
+			},
+
+			saveOrUpdateBody:{},
+
+			saveOrUpdateLastResponse:{
+				notify:true,
+				observer:'onSaveOrUpdateResponse'
+			},
+
+			//delete
+			onDeleteCallback:{
+				notify:true,
+
+			},
+
+			//constants
+			crudRequestContentType:{
+				type:String,
+				value:'application/json',
+				readonly:true
+			},
+
+			crudRequestMethod:{
+				type:String,
+				value:'POST',
+				readonly:true
+			},
+
+			crudResponseHandleAs:{
+				type:String,
+				value:'json',
+				readonly:true
+			}
+		},
+
+		initCrudBehavior:function(dataRef,dataSourcesRef,deleteCallbackRef,saveOrUpdateProviderRef){
+			this.data=dataRef;
+			this.datasources=dataSourcesRef;
+			this.onDeleteCallback=deleteCallbackRef;
+			this.saveOrUpdateProvider=saveOrUpdateProviderRef;
+			this.onSavedStateChanged();			
+		},
+
+		onSavedStateChanged:function(){
+			if(this.saved){
+				//request data
+				for(index in this.datasources){
+					this.datasources[index].generateRequest();
+				}
+			}
+		},
+
+		save:function(){
+			if(this.valid && this.saveOrUpdateProvider != null){
+				console.log("Saving...");
+				this.saveOrUpdateProvider.generateRequest();
+			}
+		},
+
+		remove:function(item){
+			this.onDeleteCallback.onRemove(item);
+		},
+
+		
+		notifyDataChanged:function(data){
+			this.data=data;
+		},
+
+		computeIfSaved:function(data){
+			return data.id != null;
+		}
+	}
+
+</script>

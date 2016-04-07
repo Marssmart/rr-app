@@ -1,0 +1,164 @@
+<dom-module id="article-editable">
+	<template>
+		<style>
+			
+			.article-material{
+				padding:20px;
+				margin-bottom:20px;
+				color:white;
+			}
+			
+			.title-input{
+				display: inline-block;
+				padding-left:5px;
+				padding-right:5px;
+				width:50%;
+			}
+			
+			.titles-container{
+				display:flex;
+			}
+			
+			.article-actions{
+				margin-top:20px;
+			}
+			
+			
+		 	.grey {
+		      background: var(--google-grey-100);
+		    }
+		    
+		    .blue {
+		      background: var(--paper-light-blue-200);
+		    }
+		    
+		     .blue-dark {
+		      background: var(--paper-light-blue-500);
+		    }
+		    
+		    .red{
+		      background: var(--google-red-300);
+		    }
+		    
+		    .green{
+		      background: var(--google-green-300);
+		    }
+		    
+		    
+		    paper-card {
+			   color: black;
+			   --paper-card-header-color: black;
+			   margin-top:20px;	
+			   width:100%;
+		    }
+		</style>
+		
+		<iron-ajax
+				id="mapRefferenceAjax"
+				url="{{baseUrl}}/mapRefferencesLoadForArticle"
+				body="{{mapRefferenceRequestBody}}"
+				handle-as="json"
+				content-type="{{mapRefferenceBodyContentType}}"
+				method="POST"
+				last-response="{{lastResponse}}">
+		</iron-ajax>
+		
+		<paper-material class="article-material blue">
+			<template is="dom-if" if="{{!saved}}">
+				<div>
+					<iron-icon icon="icons:block"></iron-icon>
+					Neuložený
+				</div>
+			</template>
+
+			<div class="titles-container">
+				<!-- Hlavny titulok -->
+				<paper-input label="Titulok" value="{{article.mainTitle}}" class="title-input"></paper-input>
+				
+				<!-- Vedlajsi titulok -->
+				<paper-input label="Podtitulok" value="{{article.subTitle}}" class="title-input"></paper-input>
+				
+				<paper-checkbox disabled checked="{{article.published}}">Publikovaný</paper-checkbox>
+			</div>
+			
+			<!-- Text -->
+			<paper-input label="Text" value="{{article.content}}"></paper-input>
+			
+			<div class="article-actions">
+				<paper-button raised class="green">Uložiť</paper-button>
+				<paper-button raised class="blue-dark" disabled="{{!saved}}">Publikovať</paper-button>
+				<paper-button raised class="red" on-tap="remove">Odstraniť</paper-button>
+			</div>
+			
+			<template is="dom-repeat" items="{{mapRefferences}}">
+				<map-refference-editable base-url="{{baseUrl}}" 
+										 parent-article-id="{{article.id}}"
+										 refference="{{item}}" 
+										 refference-remove-callback="{{onMapRefferenceRemoveCallback}}">
+				</map-refference-editable>
+			</template>
+		</paper-material>
+	</template>
+</dom-module>
+<script>
+	Polymer({
+		is:'article-editable',
+		
+		behaviors:[
+				    CrudBehavior
+				  ],
+
+		properties:{
+			baseUrl:{},
+			
+			article:{notify:true},
+
+			articleDeleteCallback:{notify:true},
+
+			/**
+			* Map Refferences
+			*/
+			mapRefferenceRequestBody:{computed:'computeMapRefferenceRequestBody(article)'},
+
+			mapRefferenceBodyContentType:{value:'application/json'},
+
+			lastResponse:{},
+			
+			mapRefferences:{computed:'computeMapRefferences(lastResponse)'},
+			
+			onMapRefferenceRemoveCallback:{}
+		},
+
+		
+		ready:function(){
+			this.initMapRefferenceRemoveCallback();
+			this.initCrudBehavior(this.article,[this.$.mapRefferenceAjax],this.articleDeleteCallback);
+		},
+
+		initMapRefferenceRemoveCallback:function(){
+
+			var ref=this;
+
+			this.onMapRefferenceRemoveCallback=({
+				onRemove:function(item){
+					var index = ref.mapRefferences.indexOf(item);
+					console.log("onMapRefferenceRemoveCallback for index "+index);
+					ref.splice('mapRefferences', index, 1);
+				}
+			});
+		},
+
+
+		remove:function(){
+			this.notifyRemoved(this.article);
+		},
+		
+		computeMapRefferenceRequestBody:function(article){
+			return JSON.stringify({"articleId":article.id});
+		},
+		
+		computeMapRefferences:function(lastResponse){
+			return lastResponse.mapRefferences;
+		}
+	});
+</script>
