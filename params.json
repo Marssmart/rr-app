@@ -1,6 +1,6 @@
 {
   "name": "Radio Rallye App",
   "tagline": "Navigation App for participants on Radio Rallye 2017 event",
-  "body": "# Radio Rallye App\r\n\r\nThis project was created for purpose of navigating participants of Radio Rallye 2017 event ,that will took place in Žilina/Slovakia.\r\n\r\n## Main Goals\r\n* Create mobile friendly application\r\n* Allow to add multiple articles\r\n* Allow notification\r\n* Wrap application as \"Native\" in Android\r\n\r\n## Current State\r\n* Article support for Title,Main Title,Content and Google Maps with Routes and Markers - DONE\r\n* Native/Web notifications - IN PROGRESS\r\n* Youtube Video Support for Articles - PLANNED\r\n\r\n\r\n\r\n",
+  "body": "# Radio Rallye App\r\n\r\nThis project was created for purpose of navigating participants of Radio Rallye 2017 event ,that will took place in Žilina/Slovakia.\r\n\r\n## Main Goals\r\n* Create mobile friendly application\r\n* Allow to add multiple articles\r\n* Allow notification\r\n* Wrap application as \"Native\" in Android\r\n\r\n## Current State\r\n* Article support for Title,Main Title,Content and Google Maps with Routes and Markers - DONE\r\n* Native/Web notifications - IN PROGRESS\r\n* Youtube Video Support for Articles - PLANNED\r\n\r\n## Used Technologies\r\n* Spring Boot\r\n* Spring JPA\r\n* Spring Actuator\r\n\r\n## Requirements\r\n* For Windows(Local Development)\r\n* * HSQLDB\r\n* For Linux(Production)\r\n* * MySql\r\n\r\n\r\n\r\n",
   "note": "Don't delete this file! It's used internally to help with page regeneration."
 }
