@@ -1,6 +1,7 @@
 package org.rapes.rr.app.core.controller;
 
 import org.rapes.rr.app.core.controller.dto.input.route.MapRouteInputDTO;
+import org.rapes.rr.app.core.controller.dto.input.route.MapRouteSaveOrUpdateInputDTO;
 import org.rapes.rr.app.core.controller.dto.output.route.MapRouteOutputDTO;
 import org.rapes.rr.app.core.controller.dto.output.route.MapRouteSaveOrUpdateOutputDTO;
 import org.rapes.rr.app.core.controller.params.RequestParams;

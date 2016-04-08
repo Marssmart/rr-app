@@ -1,4 +1,4 @@
-package org.rapes.rr.app.core.controller;
+package org.rapes.rr.app.core.controller.dto.input.route;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
