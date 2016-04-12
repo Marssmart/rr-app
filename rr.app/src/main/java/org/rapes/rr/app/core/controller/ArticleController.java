@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 
 import javax.annotation.PostConstruct;
 
+import org.rapes.rr.app.core.controller.dto.input.article.ArticleDeleteInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.article.ArticleLoadPageInputDTO;
+import org.rapes.rr.app.core.controller.dto.output.article.ArticleDeleteOutputDTO;
 import org.rapes.rr.app.core.controller.dto.output.article.ArticleLoadPageOutputDTO;
 import org.rapes.rr.app.core.controller.params.RequestParams;
 import org.rapes.rr.app.core.controller.params.RequestPaths;
@@ -188,5 +190,28 @@ public class ArticleController {
 								Sort.Direction.DESC,
 								CREATED_AT_PROP))
 				.getContent());
+	}
+	
+	@CrossOrigin
+	@RequestMapping(value=RequestPaths.ARTICLE_DELETE,
+			method=RequestMethod.POST,
+			produces=RequestParams.PRODUCES_JSON,
+			consumes=RequestParams.CONSUMES_JSON)
+	@ResponseBody
+	public ArticleDeleteOutputDTO delete(@RequestBody ArticleDeleteInputDTO dto){
+		
+		if(dto == null || !dto.isValid()){
+			return ArticleDeleteOutputDTO.asInvalid();
+		}
+		
+		Article article = articleRepository.findOne(dto.getArticleId());
+		
+		mapLocationRepository.deleteLocationsForRoutesForRefferencesOfArticle(article);
+		mapRouteRepository.deleteRoutesForRefferencesOfArticle(article);
+		mapMarkerRepository.deleteMarkersForRefferencesOfArticle(article);
+		mapRefferenceRepository.deleteRefferencesForArticle(article);
+		articleRepository.delete(article);
+
+		return ArticleDeleteOutputDTO.success();
 	}
 }

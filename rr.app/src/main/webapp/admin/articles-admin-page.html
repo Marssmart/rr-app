@@ -16,7 +16,6 @@
 <link href="./../static/bower_components/iron-icons/iron-icons.html" rel="import">
 
 <link href="crud-behavior.html" rel="import">
-<link href="crud-status-bar.html" rel="import">
 
 <link href="article-editable.html" rel="import">
 <link href="map-refference-editable.html" rel="import">
@@ -68,7 +67,9 @@
 		  	
 		  		<!-- Pridat novy -->
 		  		<div class="add-button-container">
-		  			<paper-button raised class="blue add-button" on-tap="addNew">Pridať</paper-button>
+		  			<template is="dom-if" if="{{saved}}">
+		  				<paper-button raised class="blue add-button" on-tap="addNew">Pridať</paper-button>
+		  			</template>
 		  		</div>
 		  		<!-- Clanky -->
 		  		<template is="dom-repeat" items="{{articles}}">

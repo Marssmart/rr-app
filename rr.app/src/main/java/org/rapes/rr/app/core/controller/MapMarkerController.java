@@ -2,8 +2,10 @@ package org.rapes.rr.app.core.controller;
 
 import java.util.List;
 
+import org.rapes.rr.app.core.controller.dto.input.marker.MapMarkerDeleteInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.marker.MapMarkerSaveOrUpdateInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.marker.MapMarkersInputDTO;
+import org.rapes.rr.app.core.controller.dto.output.marker.MapMarkerDeleteOutputDTO;
 import org.rapes.rr.app.core.controller.dto.output.marker.MapMarkerSaveOrUpdateOutputDTO;
 import org.rapes.rr.app.core.controller.dto.output.marker.MapMarkersOutputDTO;
 import org.rapes.rr.app.core.controller.params.RequestParams;
@@ -84,5 +86,20 @@ public class MapMarkerController {
 		return MapMarkerSaveOrUpdateOutputDTO.from(mapMarkerRepository.save(marker));
 	}
 	
-	
+	@CrossOrigin
+	@RequestMapping(value=RequestPaths.MAP_MARKERS_DELETE,
+			method=RequestMethod.POST,
+			produces=RequestParams.PRODUCES_JSON,
+			consumes=RequestParams.CONSUMES_JSON)
+	@ResponseBody
+	public MapMarkerDeleteOutputDTO delete(@RequestBody MapMarkerDeleteInputDTO dto){
+		
+		if(dto == null || !dto.isValid()){
+			return MapMarkerDeleteOutputDTO.asInvalid();
+		}
+		
+		mapMarkerRepository.delete(dto.getMapMarkerId());
+		
+		return MapMarkerDeleteOutputDTO.success();
+	}
 }

@@ -2,14 +2,19 @@ package org.rapes.rr.app.core.controller;
 
 import java.util.List;
 
+import org.rapes.rr.app.core.controller.dto.input.refference.MapRefferenceDeleteInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.refference.MapRefferenceSaveOrUpdateInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.refference.MapRefferencesInputDTO;
+import org.rapes.rr.app.core.controller.dto.output.refference.MapRefferenceDeleteOutputDTO;
 import org.rapes.rr.app.core.controller.dto.output.refference.MapRefferenceSaveOrUpdateOutputDTO;
 import org.rapes.rr.app.core.controller.dto.output.refference.MapRefferencessOutputDTO;
 import org.rapes.rr.app.core.controller.params.RequestParams;
 import org.rapes.rr.app.core.controller.params.RequestPaths;
 import org.rapes.rr.app.core.dao.ArticleRepository;
+import org.rapes.rr.app.core.dao.MapLocationRepository;
+import org.rapes.rr.app.core.dao.MapMarkerRepository;
 import org.rapes.rr.app.core.dao.MapRefferenceRepository;
+import org.rapes.rr.app.core.dao.MapRouteRepository;
 import org.rapes.rr.app.core.dom.Article;
 import org.rapes.rr.app.core.dom.MapRefference;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +28,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class MapRefferenceController {
+	
+	@Autowired
+	private MapLocationRepository mapLocationRepository;
+	
+	@Autowired
+	private MapRouteRepository mapRouteRepository;
+	
+	@Autowired
+	private MapMarkerRepository mapMarkerRepository;
 	
 	@Autowired
 	private MapRefferenceRepository mapRefferenceRepository;
@@ -85,5 +99,31 @@ public class MapRefferenceController {
 		refference.setLongitude(dto.getLongitude());
 		
 		return MapRefferenceSaveOrUpdateOutputDTO.from(mapRefferenceRepository.save(refference));
+	}
+	
+	@CrossOrigin
+	@RequestMapping(value=RequestPaths.MAP_REFFERENCES_DELETE,
+			method=RequestMethod.POST,
+			produces=RequestParams.PRODUCES_JSON,
+			consumes=RequestParams.CONSUMES_JSON)
+	@ResponseBody
+	public MapRefferenceDeleteOutputDTO delete(@RequestBody MapRefferenceDeleteInputDTO dto){
+		
+		if(dto == null || !dto.isValid()){
+			return MapRefferenceDeleteOutputDTO.asInvalid();
+		}
+		
+		MapRefference refference = mapRefferenceRepository.findOne(dto.getMapRefferenceId());
+				
+		if(refference == null){
+			return MapRefferenceDeleteOutputDTO.asInvalid();
+		}
+		
+		mapLocationRepository.deleteLocatonsForRoutesOfRefference(refference);
+		mapRouteRepository.deleteRoutesForRefference(refference);
+		mapMarkerRepository.deleteMarkerForRefference(refference);
+		mapRefferenceRepository.delete(refference);
+		
+		return MapRefferenceDeleteOutputDTO.success();
 	}
 }

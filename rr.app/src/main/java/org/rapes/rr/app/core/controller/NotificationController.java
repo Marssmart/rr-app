@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import javax.transaction.Transactional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.rapes.rr.app.core.controller.dto.input.notification.NotificationInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.notification.NotificationSaveInputDTO;
@@ -21,6 +23,7 @@ import org.rapes.rr.app.core.dom.functions.NotificationToSessionConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,7 +44,7 @@ public class NotificationController {
 	@Autowired
 	private NotificationSessionRepository notificationSessionRepository;
 	
-	/*@Scheduled(fixedRate = 60000)
+	@Scheduled(fixedRate = 60000)
 	@Transactional
 	public void scheduledCleanup(){
 		LocalDateTime stamp = LocalDateTime.now().minusMinutes(1);
@@ -50,7 +53,7 @@ public class NotificationController {
 		notificationSessionRepository.cleanup(stamp);
 		notificationRepository.cleanup(stamp);
 		LOGGER.info("Cleanup task finished");
-	}*/
+	}
 	
 	@CrossOrigin
 	@RequestMapping(value=RequestPaths.NOTIFICATIONS_SES_UUID,

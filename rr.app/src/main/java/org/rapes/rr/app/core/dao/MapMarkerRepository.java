@@ -2,6 +2,7 @@ package org.rapes.rr.app.core.dao;
 
 import java.util.List;
 
+import org.rapes.rr.app.core.dom.Article;
 import org.rapes.rr.app.core.dom.MapMarker;
 import org.rapes.rr.app.core.dom.MapRefference;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +15,11 @@ public interface MapMarkerRepository  extends PagingAndSortingRepository<MapMark
 
 	@Query("SELECT mr FROM MapMarker mr WHERE mr.parentMapRefference=:refference")
 	public List<MapMarker> getMapRefferencesforArticle(@Param("refference")MapRefference refference);
+	
+	@Query("DELETE FROM MapMarker mr WHERE mr.parentMapRefference = :refference")
+	public void deleteMarkerForRefference(@Param("refference") MapRefference refference);
+	
+	@Query("DELETE FROM MapMarker mr WHERE mr.parentMapRefference in ("
+			+ "SELECT ref MapRefference ref WHERE ref.parentArticle = :article)")
+	public void deleteMarkersForRefferencesOfArticle(@Param("article") Article article);
 }

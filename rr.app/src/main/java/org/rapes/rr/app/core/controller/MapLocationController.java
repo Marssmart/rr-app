@@ -1,7 +1,9 @@
 package org.rapes.rr.app.core.controller;
 
+import org.rapes.rr.app.core.controller.dto.input.location.MapLocationDeleteInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.location.MapLocationInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.location.MapLocationSaveOrUpdateInputDTO;
+import org.rapes.rr.app.core.controller.dto.output.location.MapLocationDeleteOutputDTO;
 import org.rapes.rr.app.core.controller.dto.output.location.MapLocationOutputDTO;
 import org.rapes.rr.app.core.controller.dto.output.location.MapLocationSaveOrUpdateOutputDTO;
 import org.rapes.rr.app.core.controller.params.RequestParams;
@@ -77,5 +79,22 @@ public class MapLocationController {
 		location.setLocationOrder(dto.getOrder());
 		
 		return MapLocationSaveOrUpdateOutputDTO.from(mapLocationRepository.save(location));
+	}
+	
+	@CrossOrigin
+	@RequestMapping(value=RequestPaths.MAP_LOCATION_DELETE,
+			method=RequestMethod.POST,
+			produces=RequestParams.PRODUCES_JSON,
+			consumes=RequestParams.CONSUMES_JSON)
+	@ResponseBody
+	public MapLocationDeleteOutputDTO delete(@RequestBody MapLocationDeleteInputDTO dto){
+		
+		if(dto == null || !dto.isValid()){
+			return MapLocationDeleteOutputDTO.asInvalid();
+		}
+		
+		mapLocationRepository.delete(dto.getMapLocationId());
+		
+		return MapLocationDeleteOutputDTO.success();
 	}
 }

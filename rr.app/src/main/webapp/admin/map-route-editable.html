@@ -74,6 +74,21 @@
 		</iron-ajax>
 		<div>
 			<paper-material class="route-material orange">
+					<div>
+						<template is="dom-if" if="{{!saved}}">
+							<span>
+								<iron-icon icon="icons:block"></iron-icon>
+								Neuložený	
+							</span>
+						</template>
+
+						<template is="dom-if" if="{{!valid}}">
+							<span>
+								<iron-icon icon="icons:cancel"></iron-icon>
+								Neplatná kombinácia dát
+							</span>
+						</template>
+					</div>
 					<paper-input label="Začiatočná adresa" value="{{route.startAddress}}" class="route-material-part route-material-input"></paper-input>
 					<paper-input label="Koncová adresa" value="{{route.endAddress}}" class="route-material-part route-material-input"></paper-input>
 					<paper-button raised 
@@ -90,7 +105,9 @@
 					<div>
 						<div class="locations-title">Medzizástavky</div>
 						<div>
-							<paper-button class="grey addNewButton" on-tap="addNew">Pridať</paper-button>
+							<template is="dom-if" if="{{saved}}">
+								<paper-button class="grey addNewButton" on-tap="addNew">Pridať</paper-button>
+							</template>
 						</div>		    
 						<template is="dom-repeat" items="{{locations}}">
 							<map-location-editable base-url="{{baseUrl}}"

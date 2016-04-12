@@ -14,4 +14,7 @@ public interface MapRefferenceRepository extends PagingAndSortingRepository<MapR
 
 	@Query("SELECT mr FROM MapRefference mr WHERE mr.parentArticle=:article")
 	public List<MapRefference> getMapRefferencesforArticle(@Param("article")Article article);
+	
+	@Query("DELETE FROM MapRefference mr WHERE mr.parentArticle = :article")
+	public void deleteRefferencesForArticle(@Param("article") Article article);
 }

@@ -22,7 +22,11 @@
 			.article-actions{
 				margin-top:20px;
 			}
-			
+
+			.addNewButton{
+				margin-top: 10px;
+				color:black;
+			}
 			
 		 	.grey {
 		      background: var(--google-grey-100);
@@ -42,6 +46,10 @@
 		    
 		    .green{
 		      background: var(--google-green-300);
+		    }
+
+		    .teal {
+		      	background: var(--paper-teal-50);
 		    }
 		    
 		    
@@ -64,13 +72,21 @@
 		</iron-ajax>
 		
 		<paper-material class="article-material blue">
-			<template is="dom-if" if="{{!saved}}">
-				<div>
-					<iron-icon icon="icons:block"></iron-icon>
-					Neuložený
-				</div>
-			</template>
+			<div>
+				<template is="dom-if" if="{{!saved}}">
+					<span>
+						<iron-icon icon="icons:block"></iron-icon>
+						Neuložený	
+					</span>
+				</template>
 
+				<template is="dom-if" if="{{!valid}}">
+					<span>
+						<iron-icon icon="icons:cancel"></iron-icon>
+						Neplatná kombinácia dát
+					</span>
+				</template>
+			</div>
 			<div class="titles-container">
 				<!-- Hlavny titulok -->
 				<paper-input label="Titulok" value="{{article.mainTitle}}" class="title-input"></paper-input>
@@ -90,6 +106,9 @@
 				<paper-button raised class="red" on-tap="remove">Odstraniť</paper-button>
 			</div>
 			
+			<div>
+				<paper-button class="teal addNewButton" on-tap="addNew">Pridať</paper-button>
+			</div>
 			<template is="dom-repeat" items="{{mapRefferences}}">
 				<map-refference-editable base-url="{{baseUrl}}" 
 										 parent-article-id="{{article.id}}"
@@ -129,11 +148,42 @@
 			onMapRefferenceRemoveCallback:{}
 		},
 
-		
+		observers :['validateObserver(article.mainTitle,article.subTitle,article.content)'],
+
 		ready:function(){
-			this.initMapRefferenceRemoveCallback();
 			this.initCrudBehavior(this.article,[this.$.mapRefferenceAjax],this.articleDeleteCallback);
+			this.initMapRefferenceRemoveCallback();
 		},
+
+		onSaveOrUpdateResponse:function(){
+			if(this.saveOrUpdateLastResponse != null && this.saveOrUpdateLastResponse.valid){
+				this.article=this.saveOrUpdateLastResponse.article;
+				this.notifyDataChanged(this.article);
+				console.log("Map Refference saved");
+			}else{
+				console.log("Error saving Map Refference");
+			}
+		},
+
+		refreshSaveOrUpdateBody:function(valid,refference,parentArticleId){
+
+			if(!valid){
+				return null;
+			}
+
+			/*this.saveOrUpdateBody = JSON.stringify({
+									'id':refference.id,
+									'parentArticleId':parentArticleId,
+									'latitude':refference.latitude,
+									'longitude':refference.longitude
+								});*/
+		},
+
+		validateObserver:function(mainTitle,subTitle,content){
+			this.valid = mainTitle != null && mainTitle !="" && subTitle != null && subTitle !="" && content != null && content !="";
+			this.refreshSaveOrUpdateBody(this.valid,this.article);
+		},
+
 
 		initMapRefferenceRemoveCallback:function(){
 
@@ -148,17 +198,16 @@
 			});
 		},
 
-
-		remove:function(){
-			this.notifyRemoved(this.article);
-		},
-		
 		computeMapRefferenceRequestBody:function(article){
 			return JSON.stringify({"articleId":article.id});
 		},
 		
 		computeMapRefferences:function(lastResponse){
 			return lastResponse.mapRefferences;
+		},
+
+		addNew:function(){
+			this.unshift('mapRefferences',{});
 		}
 	});
 </script>

@@ -4,7 +4,7 @@
 			.refferences-card{
 				width:100%;
 				padding:20px;
-				margin-top:20px;
+				margin-top:10px;
 			}
 			
 			.markers-card{
@@ -16,7 +16,7 @@
 			.routes-card{
 				width:100%;
 				padding:20px;
-				margin-top:20px;
+				margin-top:10px;
 			}
 			
 			.numbers-container{
@@ -90,7 +90,21 @@
 		</iron-ajax>
 		
 		<paper-card heading="Odkaz na mapu" class="refferences-card teal">
-			<crud-status-bar saved="{{saved}}" valid="{{valid}}">
+			<div>
+				<template is="dom-if" if="{{!saved}}">
+					<span>
+						<iron-icon icon="icons:block"></iron-icon>
+						Neuložený	
+					</span>
+				</template>
+
+				<template is="dom-if" if="{{!valid}}">
+					<span>
+						<iron-icon icon="icons:cancel"></iron-icon>
+						Neplatná kombinácia dát
+					</span>
+				</template>
+			</div>
 			<div class="numbers-container">
 				<paper-input label="Zemepisná Šírka" value="{{refference.latitude}}" class="number-input">
 				</paper-input>

@@ -1,11 +1,14 @@
 package org.rapes.rr.app.core.controller;
 
+import org.rapes.rr.app.core.controller.dto.input.route.MapRouteDeleteInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.route.MapRouteInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.route.MapRouteSaveOrUpdateInputDTO;
+import org.rapes.rr.app.core.controller.dto.output.route.MapRouteDeleteOutputDTO;
 import org.rapes.rr.app.core.controller.dto.output.route.MapRouteOutputDTO;
 import org.rapes.rr.app.core.controller.dto.output.route.MapRouteSaveOrUpdateOutputDTO;
 import org.rapes.rr.app.core.controller.params.RequestParams;
 import org.rapes.rr.app.core.controller.params.RequestPaths;
+import org.rapes.rr.app.core.dao.MapLocationRepository;
 import org.rapes.rr.app.core.dao.MapRefferenceRepository;
 import org.rapes.rr.app.core.dao.MapRouteRepository;
 import org.rapes.rr.app.core.dom.MapRefference;
@@ -21,6 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MapRouteController {
 
+	@Autowired
+	private MapLocationRepository mapLocationRepository;
+	
 	@Autowired
 	private MapRouteRepository mapRouteRepository;
 	
@@ -77,5 +83,29 @@ public class MapRouteController {
 		route.setEndAddress(dto.getEndAddress());
 		
 		return MapRouteSaveOrUpdateOutputDTO.from(mapRouteRepository.save(route));
+	}
+	
+	@CrossOrigin
+	@RequestMapping(value=RequestPaths.MAP_ROUTE_DELETE,
+			method=RequestMethod.POST,
+			produces=RequestParams.PRODUCES_JSON,
+			consumes=RequestParams.CONSUMES_JSON)
+	@ResponseBody
+	public MapRouteDeleteOutputDTO delete(@RequestBody MapRouteDeleteInputDTO dto){
+		
+		if(dto == null || !dto.isValid()){
+			return MapRouteDeleteOutputDTO.asInvalid();
+		}
+		
+		MapRoute route = mapRouteRepository.findOne(dto.getMapRouteId());
+		
+		if(route == null){
+			return MapRouteDeleteOutputDTO.asInvalid();			
+		}
+		
+		mapLocationRepository.deleteLocationsForRoute(route);
+		mapRouteRepository.delete(route);
+		
+		return MapRouteDeleteOutputDTO.success();
 	}
 }
