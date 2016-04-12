@@ -1,5 +1,7 @@
 package org.rapes.rr.app.core.controller;
 
+import javax.transaction.Transactional;
+
 import org.rapes.rr.app.core.controller.dto.input.route.MapRouteDeleteInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.route.MapRouteInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.route.MapRouteSaveOrUpdateInputDTO;
@@ -85,6 +87,7 @@ public class MapRouteController {
 		return MapRouteSaveOrUpdateOutputDTO.from(mapRouteRepository.save(route));
 	}
 	
+	@Transactional
 	@CrossOrigin
 	@RequestMapping(value=RequestPaths.MAP_ROUTE_DELETE,
 			method=RequestMethod.POST,

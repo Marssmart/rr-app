@@ -60,6 +60,25 @@
 			   width:100%;
 		    }
 		</style>
+
+		<!-- Save or Update -->
+		<iron-ajax id="saveOrUpdateDatasource"
+				   url="{{baseUrl}}/articleSaveOrUpdate"
+				   method="{{crudRequestMethod}}"
+				   body="{{saveOrUpdateBody}}"
+				   last-response="{{saveOrUpdateLastResponse}}"
+				   content-type="{{crudRequestContentType}}"
+				   handle-as="{{crudResponseHandleAs}}">
+		</iron-ajax>
+
+		<iron-ajax id="deleteDatasource"
+				   url="{{baseUrl}}/articleDelete"
+				   method="{{crudRequestMethod}}"
+				   body="{{deleteBody}}"
+				   last-response="{{deleteLastResponse}}"
+				   content-type="{{crudRequestContentType}}"
+				   handle-as="{{crudResponseHandleAs}}">
+		</iron-ajax>
 		
 		<iron-ajax
 				id="mapRefferenceAjax"
@@ -101,14 +120,16 @@
 			<paper-input label="Text" value="{{article.content}}"></paper-input>
 			
 			<div class="article-actions">
-				<paper-button raised class="green">Uložiť</paper-button>
+				<paper-button raised class="green" on-tap="save">Uložiť</paper-button>
 				<paper-button raised class="blue-dark" disabled="{{!saved}}">Publikovať</paper-button>
 				<paper-button raised class="red" on-tap="remove">Odstraniť</paper-button>
 			</div>
 			
-			<div>
-				<paper-button class="teal addNewButton" on-tap="addNew">Pridať</paper-button>
-			</div>
+			<template is="dom-if" if="{{saved}}">
+				<div>
+					<paper-button class="teal addNewButton" on-tap="addNew">Pridať</paper-button>
+				</div>
+			</template>
 			<template is="dom-repeat" items="{{mapRefferences}}">
 				<map-refference-editable base-url="{{baseUrl}}" 
 										 parent-article-id="{{article.id}}"
@@ -151,7 +172,11 @@
 		observers :['validateObserver(article.mainTitle,article.subTitle,article.content)'],
 
 		ready:function(){
-			this.initCrudBehavior(this.article,[this.$.mapRefferenceAjax],this.articleDeleteCallback);
+			this.initCrudBehavior(	this.article,
+									[this.$.mapRefferenceAjax],
+									this.articleDeleteCallback,
+									this.$.saveOrUpdateDatasource,
+									this.$.deleteDatasource);
 			this.initMapRefferenceRemoveCallback();
 		},
 
@@ -165,18 +190,32 @@
 			}
 		},
 
-		refreshSaveOrUpdateBody:function(valid,refference,parentArticleId){
+		refreshSaveOrUpdateBody:function(valid,article){
 
 			if(!valid){
 				return null;
 			}
 
-			/*this.saveOrUpdateBody = JSON.stringify({
-									'id':refference.id,
-									'parentArticleId':parentArticleId,
-									'latitude':refference.latitude,
-									'longitude':refference.longitude
-								});*/
+			this.saveOrUpdateBody = JSON.stringify({
+									'id':article.id,
+									'mainTitle':article.mainTitle,
+									'subTitle':article.subTitle,
+									'text':article.content
+								});
+		},
+
+		onDeleteResponse:function(){
+			if(this.deleteLastResponse != null && this.deleteLastResponse.valid){
+				this.notifyDataDeleted();
+			}else{	
+				console.log("Unable to delete article");
+			}
+		},
+
+		refreshDeleteBody:function(article){
+			this.deleteBody = JSON.stringify({
+							  'articleId': article.id
+			});
 		},
 
 		validateObserver:function(mainTitle,subTitle,content){

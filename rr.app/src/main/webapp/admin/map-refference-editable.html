@@ -68,6 +68,16 @@
 				   content-type="{{crudRequestContentType}}"
 				   handle-as="{{crudResponseHandleAs}}">
 		</iron-ajax>
+
+		<!-- Delete -->
+		<iron-ajax id="deleteDatasource"
+				   url="{{baseUrl}}/refferencesDelete"
+				   method="{{crudRequestMethod}}"
+				   body="{{deleteBody}}"
+				   last-response="{{deleteLastResponse}}"
+				   content-type="{{crudRequestContentType}}"
+				   handle-as="{{crudResponseHandleAs}}">
+		</iron-ajax>
 		
 		<iron-ajax
 				id="mapMarkerAjax"
@@ -117,40 +127,43 @@
 				<paper-button raised class="red" on-tap="remove">Odstrániť</paper-button>
 			</div>
 			
-			<div>
+			<template is="dom-if" if="{{saved}}">
 				<div>
-					<paper-button class="paper-green addNewButton" on-tap="addNewMarker">Pridať</paper-button>
-				</div>
-				<paper-card heading="Body zaujmu" class="markers-card paper-green">
-					<div class="card-content">
-						<template is="dom-repeat" items="{{mapMarkers}}">
-							<map-marker-editable base-url="{{baseUrl}}"
-												 marker="{{item}}"
-												 parent-refference-id="{{refference.id}}"
-												 marker-remove-callback="{{onMapMarkerRemoveCallback}}">
-							</map-marker-editable>
-						</template>
+					<div>
+						<paper-button class="paper-green addNewButton" on-tap="addNewMarker">Pridať</paper-button>
 					</div>
-				</paper-card>
-			</div>
-			
-			<div>
+					<paper-card heading="Body zaujmu" class="markers-card paper-green">
+						<div class="card-content">
+							<template is="dom-repeat" items="{{mapMarkers}}">
+								<map-marker-editable base-url="{{baseUrl}}"
+													 marker="{{item}}"
+													 parent-refference-id="{{refference.id}}"
+													 marker-remove-callback="{{onMapMarkerRemoveCallback}}">
+								</map-marker-editable>
+							</template>
+						</div>
+					</paper-card>
+				</div>
+			</template>
+
+			<template is="dom-if" if="{{saved}}">
 				<div>
-					<paper-button class="paper-brown addNewButton" on-tap="addNewRoute">Pridať</paper-button>
-				</div>
-				<paper-card heading="Cesty"  class="routes-card paper-brown">
-					<div class="card-content">
-						<template is="dom-repeat" items="{{mapRoutes}}">
-							<map-route-editable base-url="{{baseUrl}}"
-												route="{{item}}"
-												parent-refference-id="{{refference.id}}"
-												route-remove-callback="{{onMapRouteRemoveCallback}}">
-							</map-route-editable>
-						</template>
+					<div>
+						<paper-button class="paper-brown addNewButton" on-tap="addNewRoute">Pridať</paper-button>
 					</div>
-				</paper-card>
-			</div>
-			
+					<paper-card heading="Cesty"  class="routes-card paper-brown">
+						<div class="card-content">
+							<template is="dom-repeat" items="{{mapRoutes}}">
+								<map-route-editable base-url="{{baseUrl}}"
+													route="{{item}}"
+													parent-refference-id="{{refference.id}}"
+													route-remove-callback="{{onMapRouteRemoveCallback}}">
+								</map-route-editable>
+							</template>
+						</div>
+					</paper-card>
+				</div>
+			</template>
 			
 		</paper-card>
 	</template>
@@ -211,7 +224,8 @@
 			this.initCrudBehavior(this.refference,
 									[this.$.mapMarkerAjax ,this.$.mapRoutesAjax],
 									this.refferenceRemoveCallback,
-									this.$.saveOrUpdateDatasource);
+									this.$.saveOrUpdateDatasource,
+									this.$.deleteDatasource);
 			this.initMapMarkerRemoveCallback();
 			this.initMapRouteRemoveCallback();
 		},
@@ -238,6 +252,20 @@
 									'latitude':refference.latitude,
 									'longitude':refference.longitude
 								});
+		},
+
+		onDeleteResponse:function(){
+			if(this.deleteLastResponse != null && this.deleteLastResponse.valid){
+				this.notifyDataDeleted();
+			}else{	
+				console.log("Unable to delete route");
+			}
+		},
+
+		refreshDeleteBody:function(refference){
+			this.deleteBody = JSON.stringify({
+							  'mapRefferenceId': refference.id
+			});
 		},
 
 		validateObserver:function(latitude,longitude,parentArticleId){

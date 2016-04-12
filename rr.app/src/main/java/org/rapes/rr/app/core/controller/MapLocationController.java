@@ -1,5 +1,7 @@
 package org.rapes.rr.app.core.controller;
 
+import javax.transaction.Transactional;
+
 import org.rapes.rr.app.core.controller.dto.input.location.MapLocationDeleteInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.location.MapLocationInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.location.MapLocationSaveOrUpdateInputDTO;
@@ -81,6 +83,7 @@ public class MapLocationController {
 		return MapLocationSaveOrUpdateOutputDTO.from(mapLocationRepository.save(location));
 	}
 	
+	@Transactional
 	@CrossOrigin
 	@RequestMapping(value=RequestPaths.MAP_LOCATION_DELETE,
 			method=RequestMethod.POST,

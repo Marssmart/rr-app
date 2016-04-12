@@ -8,35 +8,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.rapes.rr.app.core.controller.dto.function.MergeFunction;
-import org.rapes.rr.app.core.controller.dto.input.article.ArticleSaveOrUpdateInputDTO;
-
-import com.google.common.base.Function;
-
 @Entity
 @Table(name="ARTICLE")
 public class Article {
-
-	public static final MergeFunction<Article,ArticleSaveOrUpdateInputDTO> MERGE_FROM_INPUT = new MergeFunction<Article,ArticleSaveOrUpdateInputDTO>(){
-
-		@Override
-		public Article merge(Article oldData, ArticleSaveOrUpdateInputDTO delta) {
-
-			oldData.setMainTitle(delta.getMainTitle());
-			oldData.setSubTitle(delta.getSubTitle());
-			
-			return oldData;
-		}
-	}; 
-	
-	public static final Function<Article,Long> UNIQUE_INDEX_BY_ID = new Function<Article,Long>(){
-
-		@Override
-		public Long apply(Article art) {
-			return art.getId();
-		}
-		
-	};
 	
 	@Id
 	@GeneratedValue

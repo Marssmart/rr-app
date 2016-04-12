@@ -37,6 +37,18 @@
 			},
 
 			//delete
+			deleleProvider:{
+				notify:true,
+			},
+
+			deleteBody:{},
+
+			deleteLastResponse:{
+				notify:true,
+				observer:'onDeleteResponse'
+			},
+
+			//delete
 			onDeleteCallback:{
 				notify:true,
 
@@ -62,11 +74,12 @@
 			}
 		},
 
-		initCrudBehavior:function(dataRef,dataSourcesRef,deleteCallbackRef,saveOrUpdateProviderRef){
+		initCrudBehavior:function(dataRef,dataSourcesRef,deleteCallbackRef,saveOrUpdateProviderRef,deleteProviderRef){
 			this.data=dataRef;
 			this.datasources=dataSourcesRef;
 			this.onDeleteCallback=deleteCallbackRef;
 			this.saveOrUpdateProvider=saveOrUpdateProviderRef;
+			this.deleteProvider=deleteProviderRef;
 			this.onSavedStateChanged();			
 		},
 
@@ -87,12 +100,25 @@
 		},
 
 		remove:function(){
-			this.onDeleteCallback.onRemove(this.data);
+			if(this.deleteProvider != null && this.saved){
+				this.refreshDeleteBody(this.data);
+				this.deleteProvider.generateRequest();
+			}
+			else if(!this.saved){
+				this.notifyDataDeleted();
+			}
+			else{
+				console.log("Cannot invoke delete request");
+			}
+			
 		},
-
 		
 		notifyDataChanged:function(data){
 			this.data=data;
+		},
+
+		notifyDataDeleted:function(){
+			this.onDeleteCallback.onRemove(this.data);
 		},
 
 		computeIfSaved:function(data){

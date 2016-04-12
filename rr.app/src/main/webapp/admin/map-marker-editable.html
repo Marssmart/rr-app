@@ -49,6 +49,16 @@
 				   handle-as="{{crudResponseHandleAs}}">
 			</iron-ajax>
 
+			<!-- Delete -->
+			<iron-ajax id="deleteDatasource"
+					   url="{{baseUrl}}/markerDelete"
+					   method="{{crudRequestMethod}}"
+					   body="{{deleteBody}}"
+					   last-response="{{deleteLastResponse}}"
+					   content-type="{{crudRequestContentType}}"
+					   handle-as="{{crudResponseHandleAs}}">
+			</iron-ajax>
+
 			<paper-material class="data-container indigo">
 				<div>
 					<template is="dom-if" if="{{!saved}}">
@@ -104,7 +114,11 @@
 		observers :['validateObserver(marker.latitude,marker.longitude,marker.title)'],
 
 		ready:function(){
-			this.initCrudBehavior(this.marker,[],this.markerRemoveCallback,this.$.saveOrUpdateDatasource);
+			this.initCrudBehavior(	this.marker,
+									[],
+									this.markerRemoveCallback,
+									this.$.saveOrUpdateDatasource,
+									this.$.deleteDatasource);
 		},
 		
 		refreshSaveOrUpdateBody:function(valid,location){
@@ -130,6 +144,20 @@
 			}else{
 				console.log("Erro while saving");
 			}
+		},
+
+		onDeleteResponse:function(){
+			if(this.deleteLastResponse != null && this.deleteLastResponse.valid){
+				this.notifyDataDeleted();
+			}else{	
+				console.log("Unable to delete route");
+			}
+		},
+
+		refreshDeleteBody:function(marker){
+			this.deleteBody = JSON.stringify({
+							  'mapMarkerId': marker.id
+			});
 		},
 
 		validateObserver:function(latitude,longitude,title){

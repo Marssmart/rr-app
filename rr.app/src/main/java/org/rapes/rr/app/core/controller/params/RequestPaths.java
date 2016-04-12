@@ -2,9 +2,9 @@ package org.rapes.rr.app.core.controller.params;
 
 public class RequestPaths {
 
-	public static final String ARTICLE_SAVE_OR_UPDATE_SERVICE="/articleSaveOrUpdate";
-	public static final String ARTICLE_LOAD_PAGE_SERVICE="/articleLoadPage";
-	public static final String ARTICLE_LOAD_ALL_SERVICE="/articleLoadAll";	
+	public static final String ARTICLE_SAVE_OR_UPDATE="/articleSaveOrUpdate";
+	public static final String ARTICLE_LOAD_PAGE="/articleLoadPage";
+	public static final String ARTICLE_LOAD_ALL="/articleLoadAll";	
 	public static final String ARTICLE_DELETE="/articleDelete";
 	
 	public static final String NOTIFICATIONS="/notifications";

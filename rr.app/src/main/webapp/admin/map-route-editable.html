@@ -64,6 +64,15 @@
 				   handle-as="{{crudResponseHandleAs}}">
 		</iron-ajax>
 
+		<iron-ajax id="deleteDatasource"
+				   url="{{baseUrl}}/routeDelete"
+				   method="{{crudRequestMethod}}"
+				   body="{{deleteBody}}"
+				   last-response="{{deleteLastResponse}}"
+				   content-type="{{crudRequestContentType}}"
+				   handle-as="{{crudResponseHandleAs}}">
+		</iron-ajax>
+
 		<iron-ajax id="mapLocationAjax"
 				   url="{{baseUrl}}/routeLoadMapLocations"
 				   method="POST"
@@ -158,7 +167,11 @@
 		observers :['validateObserver(route.startAddress,route.endAddress,parentRefferenceId)'],
 
 		ready:function(){
-			this.initCrudBehavior(this.route,[this.$.mapLocationAjax],this.routeRemoveCallback,this.$.saveOrUpdateDatasource);
+			this.initCrudBehavior(	this.route,
+									[this.$.mapLocationAjax],
+									this.routeRemoveCallback,
+									this.$.saveOrUpdateDatasource,
+									this.$.deleteDatasource);
 			this.initOnMapLocationRemoveCallback();
 		},
 
@@ -170,6 +183,20 @@
 			}else{
 				console.log("Error saving Map route");
 			}
+		},
+
+		onDeleteResponse:function(){
+			if(this.deleteLastResponse != null && this.deleteLastResponse.valid){
+				this.notifyDataDeleted();
+			}else{	
+				console.log("Unable to delete route");
+			}
+		},
+
+		refreshDeleteBody:function(route){
+			this.deleteBody = JSON.stringify({
+							  'mapRouteId': route.id
+			});
 		},
 
 		refreshSaveOrUpdateBody:function(valid,route,parentRefferenceId){
@@ -184,7 +211,6 @@
 									'startAddress':route.startAddress,
 									'endAddress':route.endAddress
 								});
-			console.log(this.saveOrUpdateBody);
 		},
 
 		validateObserver:function(startAddress,endAddress,parentRefferenceId){
@@ -200,7 +226,6 @@
 			this.onMapLocationRemoveCallback=({
 				onRemove:function(item){
 					var index = ref.locations.indexOf(item);
-					console.log("onMapLocationRemoveCallback for index "+index);
 					ref.splice('locations', index, 1);
 				}
 			});

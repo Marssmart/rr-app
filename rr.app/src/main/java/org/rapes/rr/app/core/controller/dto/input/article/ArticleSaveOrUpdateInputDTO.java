@@ -1,27 +1,24 @@
 package org.rapes.rr.app.core.controller.dto.input.article;
 
-import org.rapes.rr.app.core.dom.Article;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.rapes.rr.app.core.controller.dto.input.InputDTO;
 
-import com.google.common.base.Function;
-
-public class ArticleSaveOrUpdateInputDTO {
-	
-	public static final Function<ArticleSaveOrUpdateInputDTO,Article> DTO_TO_ARTICLE_CONVERTER = new Function<ArticleSaveOrUpdateInputDTO,Article>(){
-
-		@Override
-		public Article apply(ArticleSaveOrUpdateInputDTO dto) {
-			Article article = new Article();
-			
-			article.setId(dto.getId());
-			article.setMainTitle(dto.getMainTitle());
-			article.setSubTitle(dto.getSubTitle());
-			
-			return article;
-		}};
+public class ArticleSaveOrUpdateInputDTO implements InputDTO{
 	
 	private long id;
 	private String mainTitle;
 	private String subTitle;
+	private String text;
+	
+	@Override
+	public boolean isValid() {
+		return new EqualsBuilder()
+				.append(false, StringUtils.isEmpty(mainTitle))
+				.append(false, StringUtils.isEmpty(subTitle))
+				.append(false, StringUtils.isEmpty(text))
+				.isEquals();
+	}
 	
 	public long getId() {
 		return id;
@@ -41,6 +38,11 @@ public class ArticleSaveOrUpdateInputDTO {
 	public void setSubTitle(String subTitle) {
 		this.subTitle = subTitle;
 	}
-	
-	
+	public String getText() {
+		return text;
+	}
+	public void setText(String text) {
+		this.text = text;
+	}
+
 }

@@ -42,6 +42,15 @@
 				   handle-as="{{crudResponseHandleAs}}">
 		</iron-ajax>
 
+		<iron-ajax id="deleteDatasource"
+				   url="{{baseUrl}}/locationDelete"
+				   method="{{crudRequestMethod}}"
+				   body="{{deleteBody}}"
+				   last-response="{{deleteLastResponse}}"
+				   content-type="{{crudRequestContentType}}"
+				   handle-as="{{crudResponseHandleAs}}">
+		</iron-ajax>
+
 		<paper-material class="location-material grey">
 			<div>
 				<template is="dom-if" if="{{!saved}}">
@@ -87,7 +96,11 @@
 		observers :['validateObserver(location.locationOrder,location.name)'],
 
 		ready:function(){
-			this.initCrudBehavior(this.location,[],this.locationRemoveCallback,this.$.saveOrUpdateDatasource);
+			this.initCrudBehavior(	this.location,
+									[],
+									this.locationRemoveCallback,
+									this.$.saveOrUpdateDatasource,
+									this.$.deleteDatasource);
 		},
 
 		refreshSaveOrUpdateBody:function(valid,location){
@@ -104,10 +117,26 @@
 								});
 		},
 
+		refreshDeleteBody:function(location){
+			this.deleteBody = JSON.stringify({
+							  'mapLocationId': location.id
+			});
+		},
+
 		onSaveOrUpdateResponse:function(){
 			if(this.saveOrUpdateLastResponse != null && this.saveOrUpdateLastResponse.valid){
 				this.location=this.saveOrUpdateLastResponse.location;
 				this.notifyDataChanged(this.location);
+			}else{
+				console.log("Unable to update location");
+			}
+		},
+
+		onDeleteResponse:function(){
+			if(this.deleteLastResponse != null && this.deleteLastResponse.valid){
+				this.notifyDataDeleted();
+			}else{
+				console.log("Unable to delete location");
 			}
 		},
 

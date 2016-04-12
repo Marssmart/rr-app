@@ -8,7 +8,7 @@ public class MapRefferenceDeleteInputDTO implements InputDTO {
 	
 	@Override
 	public boolean isValid() {
-		return mapRefferenceId == 0L;
+		return mapRefferenceId != 0L;
 	}
 
 	public long getMapRefferenceId() {

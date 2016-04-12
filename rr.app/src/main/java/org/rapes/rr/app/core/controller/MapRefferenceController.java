@@ -2,6 +2,8 @@ package org.rapes.rr.app.core.controller;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.rapes.rr.app.core.controller.dto.input.refference.MapRefferenceDeleteInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.refference.MapRefferenceSaveOrUpdateInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.refference.MapRefferencesInputDTO;
@@ -101,6 +103,7 @@ public class MapRefferenceController {
 		return MapRefferenceSaveOrUpdateOutputDTO.from(mapRefferenceRepository.save(refference));
 	}
 	
+	@Transactional
 	@CrossOrigin
 	@RequestMapping(value=RequestPaths.MAP_REFFERENCES_DELETE,
 			method=RequestMethod.POST,

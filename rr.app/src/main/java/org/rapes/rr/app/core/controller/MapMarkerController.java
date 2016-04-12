@@ -2,6 +2,8 @@ package org.rapes.rr.app.core.controller;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.rapes.rr.app.core.controller.dto.input.marker.MapMarkerDeleteInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.marker.MapMarkerSaveOrUpdateInputDTO;
 import org.rapes.rr.app.core.controller.dto.input.marker.MapMarkersInputDTO;
@@ -86,6 +88,7 @@ public class MapMarkerController {
 		return MapMarkerSaveOrUpdateOutputDTO.from(mapMarkerRepository.save(marker));
 	}
 	
+	@Transactional
 	@CrossOrigin
 	@RequestMapping(value=RequestPaths.MAP_MARKERS_DELETE,
 			method=RequestMethod.POST,
