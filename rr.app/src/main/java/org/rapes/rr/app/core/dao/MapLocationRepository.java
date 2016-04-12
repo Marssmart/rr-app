@@ -20,12 +20,12 @@ public interface MapLocationRepository  extends PagingAndSortingRepository<MapLo
 	@Query("DELETE FROM MapLocation l WHERE l.parentMapRoute = :route")
 	public void deleteLocationsForRoute(@Param("route") MapRoute route);
 	
-	@Query("DELETE FROM MapLocation loc WHERE l.parentMapRoute in ("
+	@Query("DELETE FROM MapLocation loc WHERE loc.parentMapRoute in ("
 			+ "SELECT rou FROM MapRoute rou WHERE rou.parentMapRefference in ("
 				+ "SELECT ref FROM MapRefference ref WHERE ref.parentArticle = :article))")
-	public void deleteLocationsForRoutesForRefferencesOfArticle(@Param("artice") Article article);
+	public void deleteLocationsForRoutesForRefferencesOfArticle(@Param("article") Article article);
 	
-	@Query("DELETE FROM MapLocation loc WHERE l.parentMapRoute in ("
+	@Query("DELETE FROM MapLocation loc WHERE loc.parentMapRoute in ("
 			+ "SELECT rou FROM MapRoute rou WHERE rou.parentMapRefference = :refference)")
 	public void deleteLocatonsForRoutesOfRefference(@Param("refference") MapRefference refference);
 }

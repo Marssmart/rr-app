@@ -20,6 +20,6 @@ public interface MapMarkerRepository  extends PagingAndSortingRepository<MapMark
 	public void deleteMarkerForRefference(@Param("refference") MapRefference refference);
 	
 	@Query("DELETE FROM MapMarker mr WHERE mr.parentMapRefference in ("
-			+ "SELECT ref MapRefference ref WHERE ref.parentArticle = :article)")
+			+ "SELECT ref FROM MapRefference ref WHERE ref.parentArticle = :article)")
 	public void deleteMarkersForRefferencesOfArticle(@Param("article") Article article);
 }

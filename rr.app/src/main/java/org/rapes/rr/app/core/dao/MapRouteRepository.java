@@ -20,6 +20,6 @@ public interface MapRouteRepository extends PagingAndSortingRepository<MapRoute,
 	public void deleteRoutesForRefference(@Param("refference") MapRefference refference);
 	
 	@Query("DELETE FROM MapRoute route WHERE route.parentMapRefference in ("
-			+ "SELECT ref MapRefference ref WHERE ref.parentArticle = :article)")
+			+ "SELECT ref FROM MapRefference ref WHERE ref.parentArticle = :article)")
 	public void deleteRoutesForRefferencesOfArticle(@Param("article") Article article);
 }
