@@ -2,21 +2,39 @@
 <link href="static/bower_components/google-map/google-map.html" rel="import">
 <link href="static/bower_components/google-map/google-map-marker.html" rel="import">
 <link href="static/bower_components/google-map/google-map-directions.html" rel="import">
+<link href="static/bower_components/iron-ajax/iron-ajax.html" rel="import">
 
 <dom-module id="map-content">
 	<template>
+	<!-- Dorobit komponent na map route s medzizastavkami-->
+		<iron-ajax
+				auto
+				id="mapLocationAjax"
+				url="{{baseUrl}}/routeLoadMapLocations"
+				body="{{mapMLocationRequestBody}}"
+				handle-as="json"
+				content-type="{{mapLocationBodyContentType}}"
+				method="POST"
+				last-response="{{mapLocations}}">
+			</iron-ajax>
 		<div class="map-style">
-			<google-map map="{{map}}" zoom="{{defaultZoom}}" id="thisMap" latitude="{{refference.latitude}}" longitude="{{refference.longitude}}" apiKey="{{apiKey}}" additionalMapOptions="{{additionalMapOptions}}" fit-to-markers>
+			<google-map map="{{map}}" zoom="{{defaultZoom}}" id="thisMap" 
+			latitude="{{refference.latitude}}" longitude="{{refference.longitude}}" 
+			apiKey="{{apiKey}}" additionalMapOptions="{{additionalMapOptions}}" fit-to-markers>
 					<template visible="{{markers.valid}}" is="dom-repeat" items="{{markers.markers}}">
-						<google-map-marker latitude="{{item.latitude}}" longitude="{{item.longitude}}" draggable="false" title="{{item.title}}"></google-map-marker>
+						<google-map-marker 
+							latitude="{{item.latitude}}" 
+							longitude="{{item.longitude}}" 
+							draggable="false" 
+							title="{{item.title}}">
+						</google-map-marker>
 					</template>
 			</google-map>
 			<template visible="{{routes.valid}}" is="dom-repeat" items="{{routes.mapRoutes}}">
 				<google-map-directions map="{{map}}"
 					      start-address="{{item.startAddress}}"
 					      end-address="{{item.endAddress}}"
-					      travel-mode="{{item.travelMode}}"
-					      >
+					      travel-mode="WALKING">
 				</google-map-directions>
 			</template>
 		</div>
@@ -48,7 +66,7 @@
 			},
 			additionalMapOptions:{
 				notify:true
-			}
+			},
 		}
 	});
 </script>

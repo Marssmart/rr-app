@@ -15,6 +15,7 @@ import org.rapes.rr.app.core.dao.MapRefferenceRepository;
 import org.rapes.rr.app.core.dao.MapRouteRepository;
 import org.rapes.rr.app.core.dom.MapRefference;
 import org.rapes.rr.app.core.dom.MapRoute;
+import org.rapes.rr.app.core.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,6 +35,9 @@ public class MapRouteController {
 	
 	@Autowired
 	private MapRefferenceRepository mapRefferenceRepository;
+	
+	@Autowired
+	private NotificationService notificationService;
 	
 	@CrossOrigin
 	@RequestMapping(value=RequestPaths.MAP_ROUTE_LOAD_FOR_MAP_REFFERENCE,
@@ -84,6 +88,8 @@ public class MapRouteController {
 		route.setStartAddress(dto.getStartAddress());
 		route.setEndAddress(dto.getEndAddress());
 		
+		notificationService.notifyRefreshArticles();
+		
 		return MapRouteSaveOrUpdateOutputDTO.from(mapRouteRepository.save(route));
 	}
 	
@@ -108,6 +114,8 @@ public class MapRouteController {
 		
 		mapLocationRepository.deleteLocationsForRoute(route);
 		mapRouteRepository.delete(route);
+		
+		notificationService.notifyRefreshArticles();
 		
 		return MapRouteDeleteOutputDTO.success();
 	}

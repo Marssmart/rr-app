@@ -21,8 +21,8 @@
 			.notification-icon{
 				padding-left:1vw;
 				padding-right:1vw;
-				height:6vh;
-				width:10vw;
+				height:20px;
+				width:20px;
 			}
 		
 			.notification-item{
@@ -67,8 +67,9 @@
 		<paper-toast id="mainToast" 
 					 class="fit-bottom main-toast" 
 					 iron-overlay-closed="onMainToastClosed"
-					 duration="4000">
-			
+					 duration="4000"
+					 >
+			<!-- duration="4000" -->
 			<template is="dom-repeat" items={{notifications.notifications}}>
 				<div class="notification-content-bar">
 					<iron-icon class="notification-icon" icon="icons:info"></iron-icon>
@@ -90,6 +91,11 @@
 		
 		properties:{
 			
+			refresh:{
+				notify:true,
+				value:false
+			},
+
 			baseUrl:{
 				
 			},
@@ -116,19 +122,36 @@
 			
 			notificationSesUuidRequestContentType:{
 				value:'application/json'
+			},
+
+			notificationCookieKey:{
+				value:'notification_session',
+				readonly:true
 			}
 		},
 		
 		ready : function(){	
-			this.$.notificationSesUuidAjax.generateRequest();
+			var session = this.readCookie(this.notificationCookieKey);
+			if(session == null){
+				this.$.notificationSesUuidAjax.generateRequest();
+			}else{
+				this.uuid=session;
+				this.scheduleNotificationPooling();
+			}
 		},
 		
 		onSesUuidResponse:function(e){
-			
+			this.createCookie(	this.notificationCookieKey,
+								this.sesUuidReponse.uuid);
 			this.uuid=this.sesUuidReponse.uuid;
 			
 			console.log("Notification session obtained for "+this.uuid);
 			
+			this.scheduleNotificationPooling();
+		},
+
+		scheduleNotificationPooling:function(){
+			console.log("Scheduling notifications");
 			var ref = this;
 			setInterval(function(){
 				ref.processNotifications();
@@ -142,7 +165,31 @@
 		onNotificationRequestResponse : function(){
 			if(this.notifications != null && this.notifications.valid && this.notifications.notifications.length){
 				console.log(this.notifications.notifications.length + " notification found");
-				this.$.mainToast.toggle();
+
+				var visibleNotifications=[];
+				var refreshArticles = false;
+
+				for(i = 0;i<this.notifications.notifications.length;i++){
+					if(this.notifications.notifications[i].notificationType == 'REFRESH_ARTICLES'){
+						refreshArticles=true;
+					}else{
+						visibleNotifications.push(this.notifications.notifications[i]);
+					}
+				}
+
+				this.notifications.notifications=visibleNotifications;
+
+				if(refreshArticles){
+					console.log("Refresing articles");
+					//switch true/false to invoke observer on refresh property in index-page-container
+					this.refresh=true;
+					this.refresh=false;
+				}
+				
+				if(this.notifications.notifications.length > 0){
+					console.log("Toogling visible notifications");
+					this.$.mainToast.toggle();
+				}
 			}else{
 				console.log("No notification found");
 			}
@@ -150,6 +197,31 @@
 				
 		computeNotificationRequestBody : function(uuid){
 			return JSON.stringify({'uuid' : uuid});
+		},
+
+		createCookie:function(name,value,days) {
+		    if (days) {
+		        var date = new Date();
+		        date.setTime(date.getTime()+(days*24*60*60*1000));
+		        var expires = "; expires="+date.toUTCString();
+		    }
+		    else var expires = "";
+		    document.cookie = name+"="+value+expires+"; path=/";
+		},
+
+		readCookie:function(name) {
+		    var nameEQ = name + "=";
+		    var ca = document.cookie.split(';');
+		    for(var i=0;i < ca.length;i++) {
+		        var c = ca[i];
+		        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+		    }
+		    return null;
+		},
+
+		eraseCookie:function(name) {
+		    createCookie(name,"",-1);
 		}
 		
 	});

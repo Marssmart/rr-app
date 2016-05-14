@@ -61,10 +61,31 @@
 			baseUrl:{
 				notify:true,
 				observer:'urlAfterBind'
+			},
+
+			refresh:{
+				notify:true,
+				value:false,
+				observer:'onRefreshStateChange'
 			}
 			
 		},	
 		urlAfterBind:function(){
+			this.refreshArticles();
+		},
+
+		onRefreshStateChange:function(){
+			if(this.refresh){
+				this.refresh=!this.refresh;
+				this.refreshArticles();
+			}
+		},
+
+		refreshArticles:function(){
+			console.log("Invoking refresh for articles");
+			if(this.articles!= null){
+				this.splice('articles.articles',0,this.articles.articles.length);
+			}
 			this.$.articleAjax.generateRequest();
 		},
 		

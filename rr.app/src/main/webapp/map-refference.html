@@ -48,21 +48,25 @@
 		</paper-dialog>
 		<div>
 			<iron-ajax
+				auto
 				id="mapMarkerAjax"
 				url="{{baseUrl}}/markersLoadForArticle"
 				body="{{mapMarkerRequestBody}}"
 				handle-as="json"
 				content-type="{{mapMarkerBodyContentType}}"
 				method="POST"
-				last-response="{{mapMarkers}}"></iron-ajax>
+				last-response="{{mapMarkers}}">
+			</iron-ajax>
 			<iron-ajax
+				auto
 				id="mapRoutesAjax"
 				url="{{baseUrl}}/mapRoutesLoadForMapRefference"
 				body="{{mapRoutesRequestBody}}"
 				handle-as="json"
 				content-type="{{mapRoutesBodyContentType}}"
 				method="POST"
-				last-response="{{mapRoutes}}"></iron-ajax>
+				last-response="{{mapRoutes}}">
+			</iron-ajax>
 				
 		</div>
 		<div class="map-style" >
@@ -86,11 +90,12 @@
 			baseUrl:{
 				notify:true
 			},
+
 			mapMarkerRequestBody:{
 				computed:'computeMapMarkerRequestBody(refference)'
 			},
 			mapRoutesRequestBody:{
-				computed:'computeMapRoutesRequestBody(refference)'
+				computed:'computeMapRoutesRequestBody(refference)',
 			},
 			mapMarkerBodyContentType:{
 				value:'application/json'
@@ -99,14 +104,13 @@
 				value:'application/json'
 			},
 			mapMarkers:{
-				
+				notify:true
 			},
 			mapRoutes:{
-				
+				notify:true
 			},
 			refference:{
 				notify:true,
-				observer:'onMapRefferenceBinded'
 			},
 			mapOptions:{
 				computed:'computeMapOptions(refference)'
@@ -118,7 +122,7 @@
 		},
 		
 		computeMapOptions:function(refference){
-			return '{"mapTypeId":"'+refference.mapType.toLowerCase()+'"}';
+			return '{"mapTypeId":"'+refference.mapType+'"}';
 		},
 		
 		computeMapMarkerRequestBody:function(refference){
@@ -127,20 +131,13 @@
 		computeMapRoutesRequestBody:function(refference){
 			return JSON.stringify({"mapRefferenceId":refference.id});
 		},
-		
-		onMapRefferenceBinded:function(){
-			this.$.mapMarkerAjax.generateRequest();
-			this.$.mapRoutesAjax.generateRequest();
-		},
+
 		openFullScreenMap:function(){
 			this.$.mapFullscreenDialog.toggle();
 		},
 		closeFullScreenMap:function(){
 			this.$.mapFullscreenDialog.close();
-		},
-		onGoogleMapReady:function(e){
-			console.log(e);
 		}
-		
+
 	});
 </script>

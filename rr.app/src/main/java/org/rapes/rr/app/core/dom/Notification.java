@@ -30,10 +30,10 @@ public class Notification {
 	@Enumerated(EnumType.STRING)
 	private NotificationSeverity notificationSeverity;
 	
-	@Column(name="TITLE",nullable=false)
+	@Column(name="TITLE")
 	private String title;
 	
-	@Column(name="TEXT",nullable=false)
+	@Column(name="TEXT")
 	private String text;
 	
 	@Column(name="CREATED_AT",nullable=false)

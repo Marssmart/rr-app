@@ -18,6 +18,7 @@ import org.rapes.rr.app.core.dao.MapMarkerRepository;
 import org.rapes.rr.app.core.dao.MapRefferenceRepository;
 import org.rapes.rr.app.core.dao.MapRouteRepository;
 import org.rapes.rr.app.core.dom.Article;
+import org.rapes.rr.app.core.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -50,6 +51,9 @@ public class ArticleController {
 	@Autowired
 	private MapLocationRepository mapLocationRepository;
 	
+	@Autowired
+	private NotificationService notificationService;
+	
 	@CrossOrigin
 	@RequestMapping(value=RequestPaths.ARTICLE_SAVE_OR_UPDATE,
 			method=RequestMethod.POST,
@@ -62,7 +66,6 @@ public class ArticleController {
 		}
 		
 		Article article =articleRepository.findOne(dto.getId());
-		
 		if(article == null){
 			article = new Article();
 			article.setCreatedAt(LocalDateTime.now());
@@ -72,8 +75,14 @@ public class ArticleController {
 		article.setSubTitle(dto.getSubTitle());
 		article.setContent(dto.getText());
 		
-		return ArticleSaveOrUpdateOutputDTO.from(articleRepository.save(article));
+		ArticleSaveOrUpdateOutputDTO output = ArticleSaveOrUpdateOutputDTO.from(articleRepository.save(article));
+		
+		notificationService.notifyRefreshArticles();
+		
+		return output;
 	}
+	
+
 	
 	@CrossOrigin
 	@RequestMapping(value=RequestPaths.ARTICLE_LOAD_ALL,
@@ -121,12 +130,18 @@ public class ArticleController {
 		
 		Article article = articleRepository.findOne(dto.getArticleId());
 		
+		if(article == null){
+			return ArticleDeleteOutputDTO.asInvalid();
+		}
+		
 		mapLocationRepository.deleteLocationsForRoutesForRefferencesOfArticle(article);
 		mapRouteRepository.deleteRoutesForRefferencesOfArticle(article);
 		mapMarkerRepository.deleteMarkersForRefferencesOfArticle(article);
 		mapRefferenceRepository.deleteRefferencesForArticle(article);
 		articleRepository.delete(article);
 
+		notificationService.notifyRefreshArticles();
+		
 		return ArticleDeleteOutputDTO.success();
 	}
 }

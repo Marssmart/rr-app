@@ -12,17 +12,22 @@
 		}
 	</style>
 	<template>	
-		<articles-container base-url="{{baseUrl}}"></articles-container>
-		<notification-pool base-url="{{baseUrl}}"></notification-pool>
+		<articles-container refresh="[[refresh]]" base-url="{{baseUrl}}"></articles-container>
+		<notification-pool refresh="{{refresh}}" base-url="{{baseUrl}}"></notification-pool>
 	</template>
 </dom-module>
 <script>
 	Polymer({
 		is: 'index-page-container',
 		properties: {
+			refresh:{
+				value:false,
+				notify:true,
+			},
+
 			baseUrl:{
 				type:String,
-				value:'http://192.168.0.8:5600/rr-app'
+				value:'http://localhost:5600/rr-app'
 			}
 		}
 	});

@@ -16,6 +16,7 @@ import org.rapes.rr.app.core.dao.MapMarkerRepository;
 import org.rapes.rr.app.core.dao.MapRefferenceRepository;
 import org.rapes.rr.app.core.dom.MapMarker;
 import org.rapes.rr.app.core.dom.MapRefference;
+import org.rapes.rr.app.core.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,6 +33,9 @@ public class MapMarkerController {
 	
 	@Autowired
 	private MapMarkerRepository mapMarkerRepository;
+	
+	@Autowired
+	private NotificationService notificationService;
 	
 	@CrossOrigin
 	@RequestMapping(value=RequestPaths.MAP_MARKERS_LOAD_FOR_ARTICLE,
@@ -85,6 +89,8 @@ public class MapMarkerController {
 		marker.setLongitude(dto.getLongitude());
 		marker.setTitle(dto.getTitle());
 	
+		notificationService.notifyRefreshArticles();
+		
 		return MapMarkerSaveOrUpdateOutputDTO.from(mapMarkerRepository.save(marker));
 	}
 	
@@ -102,6 +108,8 @@ public class MapMarkerController {
 		}
 		
 		mapMarkerRepository.delete(dto.getMapMarkerId());
+		
+		notificationService.notifyRefreshArticles();
 		
 		return MapMarkerDeleteOutputDTO.success();
 	}
